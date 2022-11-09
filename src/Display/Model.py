@@ -22,6 +22,7 @@ class Model:
     self.layerNums = []
     self.loadIndexMemory = 0
     self.testMaxIndex = 0
+    self.inputSize = 1
     self.learningDataPath = ''
     self.basePath = self.config['Paths']['data']
     self.network = []
@@ -33,7 +34,7 @@ class Model:
       { 'label': 'training', 'always': False },
       { 'label': 'test', 'always': False },
       { 'label': 'save', 'always': False },
-      { 'label': 'property', 'always': True },
+      { 'label': 'property', 'always': False },
       { 'label': 'quit', 'always': True } 
     ]
     # self.messages = Messages.Messages(config)
@@ -49,10 +50,10 @@ class Model:
     # ]
     self.sep = ','
 
-  # def __del__(self):
-  #   if self.process:
-  #     print('process kill')
-  #     self.process.terminate()
+  def __del__(self):
+    if self.process:
+      print('process kill')
+      self.process.terminate()
 
   def _read_file(self, path):
     if not os.path.isfile(path):

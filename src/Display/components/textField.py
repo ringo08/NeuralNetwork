@@ -11,6 +11,8 @@ defaultProps = {
   'side': tk.TOP,
   'fill': tk.X,
   'fontSize': 14,
+  'vcmd': None,
+  'validate': 'all',
   'expand': False
 }
 
@@ -23,7 +25,19 @@ class TextField(Entry):
     fontSize = props['fontSize']
     frame = Frame(master=master, width=width, height=height)
     self.label = Label(master=frame, height=height, text=text, side=tk.LEFT, expand=True, pady=8)
-    super().__init__(master=frame, width=textWidth, height=height, font=('', fontSize), side=tk.RIGHT, expand=True, pady=8, defaultValue=str(defaultValue), bindText=bindText)
+    super().__init__(
+      master=frame,
+      width=textWidth,
+      height=height,
+      font=('', fontSize),
+      side=tk.RIGHT,
+      expand=True,
+      pady=8,
+      defaultValue=str(defaultValue),
+      bindText=bindText,
+      vcmd=props['vcmd'],
+      validate=props['validate']
+    )
     
     frameProps = ['padx', 'pady', 'anchor', 'side', 'fill', 'expand']
     frame.pack(**{ key: props[key] for key in frameProps })

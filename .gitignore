@@ -2,4 +2,6 @@ __pycache__/
 rename/
 data/
 cut/
+config/
+!/config/settingConfig.py
 .DS_Store

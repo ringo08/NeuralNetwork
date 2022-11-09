@@ -85,6 +85,8 @@ class View:
   def openPropertyDialog(self):
     return PropertyDialog(
       master=self.master,
+      inputLength=self.model.layerNums[0],
+      rowSize=self.model.inputSize,
       onSubmit=self.model.propertySubmit,
       onResetDisplay=lambda: self.NetworkDialog.onResetDisplay(self.model.inputSize),
       title='Property'

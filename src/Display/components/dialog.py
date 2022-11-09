@@ -7,6 +7,7 @@ class Dialog(simpledialog.Dialog):
     self.master = master
     self.width = width
     self.height = height
+    self.actions = None
     self.footerHeight = footerHeight
     super().__init__(parent=master, title=title)
 

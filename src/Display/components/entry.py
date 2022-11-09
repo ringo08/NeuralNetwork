@@ -12,6 +12,8 @@ defaultProps = {
   'fill': tk.BOTH,
   'fontSize': 14,
   'fontColor': 'black',
+  'vcmd': None,
+  'validate': 'all',
   'expand': False
 }
 
@@ -23,10 +25,17 @@ class Entry(tk.Entry):
     self.bindText = bindText
     frame = Frame(master=master, width=width, height=height)
 
-    vcmd = (master.register(self.multipleCallback)) if multiple else (master.register(self.callback))
-    super().__init__(master=frame, justify=tk.CENTER, validate='all', validatecommand=(vcmd, '%P'), highlightthickness=0, fg=props['fontColor'])
+    defaultVcmd = (master.register(self.multipleCallback)) if multiple else (master.register(self.callback))
+    vcmd = props['vcmd'] if (props['vcmd'] is not None) else defaultVcmd
+    super().__init__(
+      master=frame,
+      justify=tk.CENTER,
+      validate=props['validate'],
+      validatecommand=(vcmd, '%P'),
+      highlightthickness=0,
+      fg=props['fontColor']
+      )
     self.config(bg=props['color'], insertbackground=props['fontColor'])
-    # self.propagate(False)
 
     if defaultValue:
       self.insert(0, defaultValue)
