@@ -1,0 +1,9 @@
+
+cd ./NeuralNetwork
+
+# use NeuralNetwork
+python test.py
+
+# view application
+python app.py
+
