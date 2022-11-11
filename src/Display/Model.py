@@ -2,7 +2,6 @@ import os, shutil
 from ..NNApp import NNApp
 from . import Messages
 from multiprocessing import Process
-import multiprocessing as mp
 from config.settingConfig import update
 
 def is_num(s):
@@ -24,30 +23,21 @@ class Model:
     self.testMaxIndex = 0
     self.inputSize = 1
     self.learningDataPath = ''
+    self.testDataPath = ''
     self.basePath = self.config['Paths']['data']
     self.network = []
     self.dataPath = { key: self.config['Paths'][key] for key in self.config['Datas'] }
+    self.messages = Messages.Messages(config)
     self.menuColumns = [
-      { 'label': 'network', 'always': True },
-      { 'label': 'junction', 'always': False },
-      { 'label': 'learning data', 'always': True },
-      { 'label': 'training', 'always': False },
-      { 'label': 'test', 'always': False },
-      { 'label': 'save', 'always': False },
-      { 'label': 'property', 'always': False },
-      { 'label': 'quit', 'always': True } 
+      { 'value': 'network', 'label': self.messages.get('menu.network'), 'always': True },
+      { 'value': 'onehot', 'label': self.messages.get('menu.onehot'), 'always': False },
+      { 'value': 'createData', 'label': self.messages.get('menu.createData'), 'always': True },
+      { 'value': 'train', 'label': self.messages.get('menu.train'), 'always': False },
+      { 'value': 'test', 'label': self.messages.get('menu.test'), 'always': False },
+      { 'value': 'save', 'label': self.messages.get('menu.save'), 'always': False },
+      { 'value': 'property', 'label': self.messages.get('menu.property'), 'always': False },
+      { 'value': 'quit', 'label': self.messages.get('menu.quit'), 'always': True } 
     ]
-    # self.messages = Messages.Messages(config)
-    # self.menuColumns = [
-    #   { 'label': self.messages.get('menu.network'), 'always': True },
-    #   { 'label': self.messages.get('menu.junction'), 'always': False },
-    #   { 'label': self.messages.get('menu.learning'), 'always': True },
-    #   { 'label': self.messages.get('menu.training'), 'always': False },
-    #   { 'label': self.messages.get('menu.test'), 'always': False },
-    #   { 'label': self.messages.get('menu.save'), 'always': False },
-    #   { 'label': self.messages.get('menu.property'), 'always': True },
-    #   { 'label': self.messages.get('menu.quit'), 'always': True } 
-    # ]
     self.sep = ','
 
   def __del__(self):
@@ -297,6 +287,7 @@ class Model:
 
 # Test Dialog Functions
   def readLearningData(self, fpath):
+    self.testDataPath = fpath
     self.getLearningData(fpath)
     self.testMaxIndex = self.NNApp.setTestData(fpath)
 

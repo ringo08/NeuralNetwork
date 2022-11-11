@@ -12,8 +12,8 @@ class Controller:
   def bind_UI(self):
     self.view.menu.buttons['network']['command'] = self.overwriteNetwork
     self.view.menu.buttons['property']['command'] = self.view.openPropertyDialog
-    self.view.menu.buttons['training']['command'] = self.view.openTrainDialog
-    self.view.menu.buttons['learning data']['command'] = self.view.openCreateLearningDataDialog
+    self.view.menu.buttons['train']['command'] = self.view.openTrainDialog
+    self.view.menu.buttons['createData']['command'] = self.view.openCreateLearningDataDialog
     self.view.menu.buttons['test']['command'] = self.view.openTestDataDialog
     self.view.menu.buttons['save']['command'] = self.saveNetwork
     self.view.menu.buttons['quit']['command'] = self.quit

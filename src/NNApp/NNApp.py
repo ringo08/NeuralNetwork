@@ -164,7 +164,7 @@ class NNApp:
     self.learning_data, self.target_data = self._read_learning_data(self.data_path['learning'])
     self.error, self.epoch, self.freq, self.interval = self._read_setting_file(self.data_path['setting'])
 
-  def train_network(self, n=0.99):
+  def train_network(self, n=1.01):
     count = 0
     e = 0
     answer = []

@@ -16,19 +16,19 @@ defaultProps = {
 }
 
 class Label(tk.Label):
-  def __init__(self, master, text='', width=64, height=32, **kwargs):
+  def __init__(self, master, text='', width=128, height=32, **kwargs):
     frame = Frame(master=master, width=width, height=height)
     self.width = width
     self.height = height
     props = { key: kwargs[key] if key in kwargs.keys() else value for key, value in defaultProps.items() }
 
     fontSize = props['fontSize']
-    super().__init__(frame, text=text, font=('', fontSize), fg=props['fontColor'])
+    frameProps = ['padx', 'pady', 'anchor', 'side', 'fill', 'expand']
+    frame.pack(**{ key: props[key] for key in frameProps })
+    super().__init__(frame, text=text, font=('', fontSize), fg=props['fontColor'], wraplength=width)
     self.config(bg=props['color'])
     self.pack(fill=tk.BOTH, padx=props['ipadx'], pady=props['ipady'], expand=True)
 
-    frameProps = ['padx', 'pady', 'anchor', 'side', 'fill', 'expand']
-    frame.pack(**{ key: props[key] for key in frameProps })
 
   def setText(self, string):
     self['text'] = string

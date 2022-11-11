@@ -77,6 +77,7 @@ class View:
     return TestDialog(
       master=self.testDialog,
       onLoadData=self.model.readLearningData,
+      defaultPath=self.model.testDataPath,
       onStartTest=self.model.startTest,
       onChangeTestIndex=lambda index: self.NetworkDialog.onUpdateDisplay(lambda: self.model.getTestAnswerByIndex(index)),
       title='Test'

@@ -15,10 +15,10 @@ class MainMenu(Frame):
   def initUI(self):
     self.buttons = {}
     for column in self.menuColumns:
-      self.buttons[column['label']] = Button(self, text=column['label'], width=128, height=48, fill=tk.BOTH)
-      self.buttons[column['label']]['state'] = tk.NORMAL if column['always'] else tk.DISABLED
+      self.buttons[column['value']] = Button(self, text=column['label'], width=128, height=48, fill=tk.BOTH)
+      self.buttons[column['value']]['state'] = tk.NORMAL if column['always'] else tk.DISABLED
     self.pack(fill=tk.BOTH, pady=24, padx=24)
 
   def changeMenuMode(self, flag: bool):
     for column in self.menuColumns:
-      self.buttons[column['label']]['state'] = tk.NORMAL if column['always'] or flag else tk.DISABLED
+      self.buttons[column['value']]['state'] = tk.NORMAL if column['always'] or flag else tk.DISABLED

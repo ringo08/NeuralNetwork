@@ -3,11 +3,12 @@ import os
 from . import Button, Frame, DialogFrame, Label
 
 class TestDialog(DialogFrame):
-  def __init__(self, master, title=None, onLoadData=None, onStartTest=None, onChangeTestIndex=None):
+  def __init__(self, master, title, defaultPath, onLoadData=None, onStartTest=None, onChangeTestIndex=None):
     self.width = 376
-    self.height = 420
+    self.height = 440
     self.testIndex = 0
     self.maxIndex = 0
+    self.testDataPath = defaultPath
     self.onLoadData = onLoadData
     self.onChangeTestIndex = onChangeTestIndex
     self.onStartTest = onStartTest
@@ -36,15 +37,16 @@ class TestDialog(DialogFrame):
     self.indexLabel.setText(f'1/{self.maxIndex}')
   
   def _init_body(self, master):
-    initButtonsFrame = Frame(master, width=276, height=120)
-    initButtonsFrame.pack(side=tk.TOP, anchor=tk.CENTER, pady=(32, 16), padx=32)
+    initButtonsFrame = Frame(master, width=276, height=200)
+    initButtonsFrame.pack(side=tk.TOP, anchor=tk.CENTER, pady=(24, 8), padx=32)
 
-    self.fileLabel = Label(initButtonsFrame, text='no file', side=tk.TOP, expand=True)
+    defaultText = self.testDataPath if self.testDataPath else 'no file path'
+    self.fileLabel = Label(initButtonsFrame, text=defaultText, width=276, side=tk.TOP, expand=True)
     self.loadData = Button(initButtonsFrame, text='load data', side=tk.TOP, command=lambda: self.fileLabel.setText(self._selectLearningDataFile()))
-    self.startTest = Button(initButtonsFrame, text='start', side=tk.LEFT, expand=True, command=self.onStart)
-    self.closeTest = Button(initButtonsFrame, text='close', side=tk.LEFT, expand=True, command=self.master.destroy)
+    self.startTest = Button(initButtonsFrame, text='start', height=64, side=tk.LEFT, expand=True, command=self.onStart)
+    self.closeTest = Button(initButtonsFrame, text='close', height=64, side=tk.LEFT, expand=True, command=self.master.destroy)
 
-    dataFrame = Frame(master, width=276, height=216)
+    dataFrame = Frame(master, width=276, height=200)
     dataFrame.pack(anchor=tk.CENTER, fill=tk.BOTH, ipady=8, padx=16, pady=8, expand=True)
     
     self.indexLabel = Label(dataFrame, text='no data', expand=True)
