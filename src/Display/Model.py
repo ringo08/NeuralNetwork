@@ -23,6 +23,7 @@ class Model:
     self.testMaxIndex = 0
     self.inputSize = 1
     self.colorRange = 2
+    self.isSaved = True
     self.learningDataPath = ''
     self.testDataPath = ''
     self.basePath = self.config['Paths']['data']
@@ -74,6 +75,7 @@ class Model:
     if toPath and os.path.isdir(self.basePath):
       try:
         shutil.copytree(self.basePath, toPath, dirs_exist_ok=True)
+        self.isSaved = True
       except Exception as e:
         self.onError(e)
 
@@ -128,6 +130,7 @@ class Model:
       self.process.terminate()
     self.writeOperation('init')
     self.network = self.NNApp.createNetwork(out=out)
+    self.isSaved = False
 
   # Create network new
   def newCreateNetwork(self, input_num=2, hidden_num=2, output_num=1):

@@ -47,9 +47,7 @@ class Controller:
     self.model.saveNetwork(fpath)
 
   def quit(self):
-    isSave = False
-    if os.path.isdir(self.model.basePath):
-      isSave = tk.messagebox.askyesno('config', 'quit before save?')
-    if isSave:
-      self.master.destroy()
+    if not self.model.isSaved:
+      if tk.messagebox.askyesno('config', 'quit before save?'):
+        self.master.destroy()
 
