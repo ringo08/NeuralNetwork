@@ -3,11 +3,12 @@ import itertools
 from . import Frame, DialogFrame, ColorBar, Graph
 
 class NetworkDialog(DialogFrame):
-  def __init__(self, master, title=None, onUpdate=None, defaultLayer=[2, 2, 3]):
+  def __init__(self, master, title=None, onUpdate=None, onClick=None, defaultLayer=[2, 2, 3]):
     self.width = 840
     self.height = 660
     self.pad = 24
     self.layers = defaultLayer
+    self.onClick = onClick
     self.onUpdate = onUpdate
     super().__init__(master, title=title, width=self.width, height=self.height)
     self.onUpdateDisplay()
@@ -22,7 +23,7 @@ class NetworkDialog(DialogFrame):
     leftFrame = Frame(master, width=self.width//2, height=self.height)
     leftFrame.pack(fill=tk.BOTH, side=tk.LEFT, expand=True, pady=self.pad)
     
-    networkFrame = Network(leftFrame, width=self.width//2, height=self.height//3*2-self.pad*2, layers=self.layers)
+    networkFrame = Network(leftFrame, width=self.width//2, height=self.height//3*2-self.pad*2, layers=self.layers, onClick=self.onClick)
     self.graph = Graph(leftFrame, width=self.width//2, height=self.height//3-self.pad)
     
     rightFrame = Frame(master, width=self.width//2, height=self.height)
@@ -53,10 +54,11 @@ class NetworkDialog(DialogFrame):
 
 
 class Network(Frame):
-  def __init__(self, master, width, height, layers):
+  def __init__(self, master, width, height, layers, onClick=None):
     self.width = width
     self.height = height
     self.layers = layers
+    self.onClick = onClick
     self.canvasPad = 16
     self.circlePad = 8
     super().__init__(master, width, height)
@@ -67,7 +69,7 @@ class Network(Frame):
 
     self.create_network()
     self.create_connection()
-    self.canvas.bind('<Button-1>', lambda e: print(self.click(e)))
+    self.canvas.bind('<Button-1>', self.click)
 
   def create_network(self):
     self.all_w = self.width / (2*max(self.layers) + 1)
@@ -99,15 +101,16 @@ class Network(Frame):
       self.weights.append(weights)
   
   def click(self, event):
-    pic = 2
+    pic = 1
     tags = [self.canvas.itemcget(obj, 'tags') for obj in self.canvas.find_overlapping(*((event.x-pic, event.y-pic, event.x+pic, event.y+pic)))]
-    tagName = None
+    if len(tags) < 1:
+      return
+    tagName = tags[0]
     for tag in tags:
-      tagName = tags[0]
       if 'current' in tag:
-        return tag.replace('current', '').strip()
-    return tagName
-      
+        tagName = tag.replace('current', '').strip()
+    onCut = lambda: self.canvas.delete(tagName)
+    self.onClick(tagName, onCut)
 
 class DisplayConnection(Frame):
   def __init__(self, master, width: int, height: int, layers):

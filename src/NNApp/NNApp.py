@@ -94,7 +94,6 @@ class NNApp:
     f = lambda nums: ','.join([str(i) for i in range(nums)])
     self._output_file(fpath, f"loss, test_index, {','.join([f'{key}({f(value)})' for key, value in numdict.items()])}")  
 
-
   def _print_bw(self, text, front_num, back_num=1):
     array = []
     for b in range(back_num):
@@ -113,7 +112,12 @@ class NNApp:
       and 0 <= w_index < len(self.network.layers[layer_index].neurons[neuron_index].weight)
     ):
       return
+    self.createNetwork(readFile=self.data_path['output'], out=True)
     self.network.layers[layer_index].neurons[neuron_index].cut(w_index)
+    self.output_network(self.data_path['construction'])
+    self.output_network(self.data_path['output'])
+    self.output_param(self.data_path['param'], index=0)
+    return True
 
   def createNetwork(self, readFile=None, out=False):
     if self.network:
@@ -169,7 +173,10 @@ class NNApp:
     e = 0
     answer = []
     score = []
+    stoped = True
     while True:
+      if self._is_read_operation_file('stop'):
+        stoped = True
       if not self._is_read_operation_file('start'):
         if score and self._is_read_operation_file('init'):
           self.initWeight()
@@ -178,6 +185,9 @@ class NNApp:
           answer = []
           score = []
         continue
+      elif stoped:
+        stoped = False
+        self.createNetwork(readFile=self.data_path['output'])
       count += 1
       score = self.network.learning(
         self.learning_data,
@@ -195,6 +205,7 @@ class NNApp:
         if e >= self.epoch:
           self._write_end_operation_file('stop')
           e = 0
+          stoped = True
         if answer[-1] < self.error:
           self._write_end_operation_file('end')
           break

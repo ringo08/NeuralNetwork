@@ -21,7 +21,7 @@ class SelectLearningDataDialog(Dialog):
     self.learningData = Frame(master, width=624, height=48)
     self.learningData.pack(fill=tk.X, ipady=4, ipadx=16, pady=16, padx=48)
 
-    self.dataPathButton = Button(self.learningData, text='Browse', width=128, side=tk.RIGHT, command=lambda: self.dataPathLabel.setText(self._selectLearningDataFile()))
+    self.dataPathButton = Button(self.learningData, text='Browse', width=128, side=tk.RIGHT, command=self._selectLearningDataFile)
     self.dataPathLabel = Label(self.learningData, text=self.dataPath if self.dataPath else 'no data', side=tk.LEFT, expand=True)
 
     paramFrame = Frame(master, width=624, height=256)
@@ -43,7 +43,12 @@ class SelectLearningDataDialog(Dialog):
     typ = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')] 
     iDir = os.path.abspath(os.path.dirname(__file__))
     fpath = tk.filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
-    return fpath
+    self.onChangeText(fpath)
+  
+  def onChangeText(self, text):
+    if text.strip():
+      self.dataPathLabel.setText(text)
+      self.dataPath = text
 
   def apply(self):
     self.writeNetworkParam({
@@ -52,7 +57,7 @@ class SelectLearningDataDialog(Dialog):
       'freq': self.updateFrequency.get(),
       'interval': self.updateInterval.get()
     })
-    self.onSelectLearningData(self.dataPathLabel.getText())
+    self.onSelectLearningData(self.dataPath)
 
 class StyledTextField(Entry):
   def __init__(self, master, width=256, height=48, text='', defaultValue=0, bindText=''):

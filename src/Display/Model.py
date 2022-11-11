@@ -236,7 +236,7 @@ class Model:
     header = lines[1]
     input_num, hidden_num, output_num = [int(line.strip()) for line in header.split(',')]
 
-    loss = [float(line.split(',')[0].strip()) for line in lines[4:]]
+    loss = [float(line.split(',')[0].strip()) for line in lines[4:] if line.split(',')[0].strip()]
     flat_array = [float(line.strip()) if line != '' else None for line in lines[getIndex].split(',')]
     index = int(flat_array[1])
     flat_array = flat_array[2:]
@@ -321,7 +321,7 @@ class Model:
       for index, line in enumerate(lines[2:]):
         outs, _, _ = self.testAnswers[index]
         print(line.rstrip()+','+','.join(['{:.3f}'.format(ans) for ans in outs[-1]]), file=out)
-      
+
 # Operation    
   def writeOperation(self, key: str):
     if not key in ['init', 'start', 'stop']:
@@ -340,6 +340,17 @@ class Model:
     self.inputSize = inputSize
     self.colorRange = colorRange
     return self.inputSize, self.colorRange
+  
+  def getParam(self, layer, neuron, weight=None):
+    weights, biases = self.readNetworkFile(-1)
+    return biases[layer-1][neuron] if weight is None else weights[layer-1][neuron][weight]
+  
+  def onCutWeight(self, layer, neuron, weight=None, onCut=None):
+    if weight is None:
+      return
+    if self.NNApp.cut_combining(layer, neuron, weight):
+      onCut()
+      return self.onUpdateNetworkParam(-1)
   
 def initNNApp(app):
   app.train_setting()

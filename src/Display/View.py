@@ -6,7 +6,8 @@ from .components import (
   NetworkSettingDialog,
   SelectLearningDataDialog,
   TrainDialog,
-  TestDialog
+  TestDialog,
+  ParamDialog
 )
 import tkinter as tk
 
@@ -27,9 +28,25 @@ class View:
       master=self.networkDialog,
       title='network',
       onUpdate=self.model.onUpdateNetworkParam,
+      onClick=self.openParamDialog,
       defaultLayer=defaultLayer
     )
     return self.NetworkDialog
+
+  def openParamDialog(self, tagName, onCut):
+    if tagName is None:
+      return
+    params = [int(tag.split(':')[1]) for tag in tagName.split('-')[1:]]
+    value = self.model.getParam(*params)
+    if value is None:
+      return
+    return ParamDialog(
+      self.networkDialog, 
+      value, 
+      title='Param', 
+      isWeight=('weight' in tagName),
+      onCut=lambda: self.NetworkDialog.onUpdateDisplay(lambda: self.model.onCutWeight(*params, onCut))
+    )
 
   def openNetworkSettingDialog(self):
     dialog = NetworkSettingDialog(

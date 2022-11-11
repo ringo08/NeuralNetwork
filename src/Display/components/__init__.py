@@ -14,6 +14,7 @@ from .mainMenu import MainMenu as MainMenu
 from .dialog import Dialog as Dialog
 from .dialogFrame import DialogFrame as DialogFrame
 from .trainDialog import TrainDialog as TrainDialog
+from .paramDialog import ParamDialog as ParamDialog
 from .testDialog import TestDialog as TestDialog
 from .networkDialog import NetworkDialog as NetworkDialog
 from .propertyDialog import PropertyDialog as PropertyDialog
@@ -36,6 +37,7 @@ __all__ = [
   'Dialog',
   'DialogFrame',
   'TrainDialog',
+  'ParamDialog',
   'TestDialog',
   'PropertyDialog',
   'NetworkDialog',

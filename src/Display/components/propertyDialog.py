@@ -86,7 +86,6 @@ class WeightTextField(TextField):
     if P == '':
       return True
     string = P.replace('.', '', 1)
-    print(string)
     return string.isdigit()
       
 
