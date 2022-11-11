@@ -36,6 +36,7 @@ class TestDialog(DialogFrame):
     self.onLoadData(self.fileLabel.getText())
     self.maxIndex = self.onStartTest()
     self.indexLabel.setText(f'1/{self.maxIndex}')
+    self.onSetIndex(0)
   
   def _init_body(self, master):
     initButtonsFrame = Frame(master, width=276, height=200)

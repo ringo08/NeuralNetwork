@@ -200,6 +200,7 @@ class NNApp:
         answer.append(self.score)
         e += 1
         # print(f'epoch: {e:3}, loss: {answer[-1], score}')
+        self.network.fit(self.learning_data[e%len(self.target_data)])
         self.output_network(self.data_path['output'])
         self.output_param(self.data_path['param'], index=e%len(self.target_data), score=self.score)
         if e >= self.epoch:

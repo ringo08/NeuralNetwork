@@ -22,7 +22,7 @@ class SelectLearningDataDialog(Dialog):
     self.learningData.pack(fill=tk.X, ipady=4, ipadx=16, pady=16, padx=48)
 
     self.dataPathButton = Button(self.learningData, text='Browse', width=128, side=tk.RIGHT, command=self._selectLearningDataFile)
-    self.dataPathLabel = Label(self.learningData, text=self.dataPath if self.dataPath else 'no data', side=tk.LEFT, expand=True)
+    self.dataPathLabel = Label(self.learningData, width=480, text=self.dataPath if self.dataPath else 'no data', side=tk.LEFT, expand=True)
 
     paramFrame = Frame(master, width=624, height=256)
     paramFrame.pack(fill=tk.BOTH, padx=48, pady=8, ipady=16, ipadx=16, expand=True)

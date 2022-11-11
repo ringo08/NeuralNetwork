@@ -49,7 +49,7 @@ class Model:
   def _read_file(self, path):
     if not os.path.isfile(path):
       self.onError('Not exist file')
-      return False
+      return
     with open(path, 'rt', encoding='utf-8') as f:
       text = f.readlines()
     return text
@@ -158,11 +158,12 @@ class Model:
       print('not found items')
       return
     self._makeBaseDir()
-    learningDatas = [data[column] for column in learningColumns]
     headerColumns = ','.join([data for data in learningColumns])
     self._output_file(fpath, headerColumns, write_type='wt')
+
+    learningDatas = [data[column] for column in learningColumns]
     headerParams = ','.join([str(len(datas[0].split(' '))) for datas in learningDatas])
-    self._output_file(fpath, headerParams, write_type='wt')
+    self._output_file(fpath, headerParams)
     inputData, targetData = tuple(learningDatas)
     for idata, tdata in zip(inputData, targetData):
       string = idata.replace(' ', ', ')
@@ -231,6 +232,8 @@ class Model:
     if not (flag or fileIndex):
       return
     lines = self._read_file(self.dataPath['param'])
+    if lines is None:
+      return
     if len(lines)-3 < abs(getIndex):
       return
     header = lines[1]
@@ -249,7 +252,6 @@ class Model:
 
     inputData = datas[0][index] if datas else [0]*input_num
     targetData = datas[1][index] if datas else [0]*output_num
-
     return (flag, loss, [inputData, hidden_out, output_out, targetData], weights)
 
   def getLearningData(self, fpath):
