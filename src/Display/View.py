@@ -23,7 +23,7 @@ class View:
     if self.networkDialog:
       self.networkDialog.destroy()
     self.networkDialog = tk.Toplevel(self.master)
-    self.NetworkDialog =  NetworkDialog(
+    self.NetworkDialog = NetworkDialog(
       master=self.networkDialog,
       title='network',
       onUpdate=self.model.onUpdateNetworkParam,
@@ -76,9 +76,10 @@ class View:
     
     return TestDialog(
       master=self.testDialog,
-      onLoadData=self.model.readLearningData,
       defaultPath=self.model.testDataPath,
+      onLoadData=self.model.readLearningData,
       onStartTest=self.model.startTest,
+      onPutFile=self.model.onPutFile,
       onChangeTestIndex=lambda index: self.NetworkDialog.onUpdateDisplay(lambda: self.model.getTestAnswerByIndex(index)),
       title='Test'
     )

@@ -157,10 +157,12 @@ class Model:
     if not any([k in data.keys() for k in learningColumns]):
       print('not found items')
       return
-    learningDatas = [data[column] for column in learningColumns]
-    header = ','.join([str(len(datas[0].split(' '))) for datas in learningDatas])
     self._makeBaseDir()
-    self._output_file(fpath, header, write_type='wt')
+    learningDatas = [data[column] for column in learningColumns]
+    headerColumns = ','.join([data for data in learningColumns])
+    self._output_file(fpath, headerColumns, write_type='wt')
+    headerParams = ','.join([str(len(datas[0].split(' '))) for datas in learningDatas])
+    self._output_file(fpath, headerParams, write_type='wt')
     inputData, targetData = tuple(learningDatas)
     for idata, tdata in zip(inputData, targetData):
       string = idata.replace(' ', ', ')
@@ -174,7 +176,7 @@ class Model:
     if not os.path.isfile(fpath):
       return
     file = self._read_file(fpath)
-    header, contents = (file[0], file[1:])
+    header, contents = (file[1], file[2:])
     columns = [int(value.strip()) for value in header.split(self.sep)]
     if not (len(columns) == 2 and all(columns)):
       self.onError('Invalid learning data')
@@ -226,7 +228,7 @@ class Model:
     fileIndex = -1 if isInit else fileIndex
     getIndex = fileIndex if fileIndex != None else -2
     flag = (operation == self.config['Operate']['start']) or isInit
-    if not flag:
+    if not (flag or fileIndex):
       return
     lines = self._read_file(self.dataPath['param'])
     if len(lines)-3 < abs(getIndex):
@@ -254,7 +256,7 @@ class Model:
     if not os.path.isfile(fpath):
       return
     datas = self._read_file(fpath)
-    data = [int(d.strip()) for d in datas[0].split(',')]
+    data = [int(d.strip()) for d in datas[1].split(',')]
     validateInOut = [self.network[0], self.network[-1]]
     if validateInOut != data:
       self.onError('not equal from network input or output to learning data')
@@ -306,7 +308,21 @@ class Model:
     outs, weights, datas = items
     
     return (True, [], [datas[0], *outs[1:], datas[1]], weights)
-    
+  
+  def onPutFile(self, fpath):
+    if not (fpath and self.testDataPath):
+      return
+    shutil.copyfile(self.testDataPath, fpath)
+    with open(fpath, 'rt') as infile:
+      lines = infile.readlines()
+    with open(fpath, 'wt') as out:
+      print(lines[0].rstrip() + ',output', file=out)
+      print(lines[1].rstrip() + f',{lines[1].split(",")[-1].strip()}', file=out)
+      for index, line in enumerate(lines[2:]):
+        outs, _, _ = self.testAnswers[index]
+        print(line.rstrip()+','+','.join(['{:.3f}'.format(ans) for ans in outs[-1]]), file=out)
+      
+# Operation    
   def writeOperation(self, key: str):
     if not key in ['init', 'start', 'stop']:
       return

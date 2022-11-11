@@ -34,7 +34,7 @@ class NetworkDialog(DialogFrame):
 
   def onResetDisplay(self, inputSize=None, weightRange=None):
     self.connection.replot(inputSize, weightRange)
-    self.onUpdateDisplay()
+    self.onUpdateDisplay(lambda: self.onUpdate(-1))
 
   def onUpdateDisplay(self, func=None):
     items = func() if bool(func) else self.onUpdate()
@@ -123,11 +123,6 @@ class DisplayConnection(Frame):
     self.colorRange = 2
     self.create_boxes()
 
-  def get_maxmin_flatter(self, array, nest=2):
-    for _ in range(nest-1):
-      array = list(itertools.chain.from_iterable(array))
-    return max(array), min(array)
-
   def update_boxes(self, layerOuts, weights):
     for canvas in self.canvas:
       for tag in canvas.get_tags():
@@ -182,8 +177,7 @@ class DisplayConnection(Frame):
     for i in range(nextLayer):
       for row in range(rows):
         for column in range(columns):
-          self.canvas[-1].create_box((width*column, height*(row+rows*i), width*(column+1), height*(row+rows*i+1)), f'boxes-layer:{next}-neuron:{i}-weight:{row+rows*i}')
-  
+          self.canvas[-1].create_box((width*column, height*(row+rows*i), width*(column+1), height*(row+rows*i+1)), f'boxes-layer:{next}-neuron:{i}-weight:{column+row*columns}')
   
   def click(self, event):
     pic = 2
