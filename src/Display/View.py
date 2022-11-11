@@ -88,8 +88,9 @@ class View:
       master=self.master,
       inputLength=self.model.layerNums[0],
       rowSize=self.model.inputSize,
+      defaultWeightRange=self.model.colorRange,
       onSubmit=self.model.propertySubmit,
-      onResetDisplay=lambda: self.NetworkDialog.onResetDisplay(self.model.inputSize),
+      onResetDisplay=self.NetworkDialog.onResetDisplay,
       title='Property'
     )
   # def openAlertDialog(self):

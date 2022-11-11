@@ -22,6 +22,7 @@ class Model:
     self.loadIndexMemory = 0
     self.testMaxIndex = 0
     self.inputSize = 1
+    self.colorRange = 2
     self.learningDataPath = ''
     self.testDataPath = ''
     self.basePath = self.config['Paths']['data']
@@ -319,8 +320,10 @@ class Model:
     return [line.strip().upper() for line in lines][0]
 
 # Property Dialog
-  def propertySubmit(self, inputSize):
+  def propertySubmit(self, inputSize, colorRange):
     self.inputSize = inputSize
+    self.colorRange = colorRange
+    return self.inputSize, self.colorRange
   
 def initNNApp(app):
   app.train_setting()
