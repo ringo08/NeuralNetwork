@@ -3,7 +3,7 @@ import os
 from . import Button, Frame, DialogFrame, Label
 
 class TestDialog(DialogFrame):
-  def __init__(self, master, title, defaultPath, onLoadData=None, onStartTest=None, onChangeTestIndex=None):
+  def __init__(self, master, title, defaultPath, onLoadData=None, onStartTest=None, onChangeTestIndex=None, onPutFile=None):
     self.width = 376
     self.height = 440
     self.testIndex = 0
@@ -12,6 +12,7 @@ class TestDialog(DialogFrame):
     self.onLoadData = onLoadData
     self.onChangeTestIndex = onChangeTestIndex
     self.onStartTest = onStartTest
+    self.onPutFile = onPutFile
     self.master = master
     super().__init__(master, title=title, width=self.width, height=self.height)
 
@@ -58,7 +59,7 @@ class TestDialog(DialogFrame):
     buttons.pack(fill=tk.BOTH, anchor=tk.CENTER, side=tk.TOP)
   
     self.showAllButton = Button(dataFrame, text='show all', side=tk.TOP)
-    self.putFileButton = Button(dataFrame, text='put file', side=tk.TOP)
+    self.putFileButton = Button(dataFrame, text='put file', side=tk.TOP, command=lambda: self.onPutFile(self._selectPutFile()))
   
   def _init_footer(self, master):
     pass
@@ -68,5 +69,11 @@ class TestDialog(DialogFrame):
     iDir = os.path.abspath(os.path.dirname(__file__))
     fpath = tk.filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
     return fpath
+
+  def _selectPutFile(self):
+    fpath = tk.filedialog.asksaveasfilename(title='Save As')
+    if fpath != '':
+      return fpath
+    
 
 

@@ -26,7 +26,7 @@ class NNApp:
     learning_data = []
     target_data = []
     with open(fpath, 'rt', encoding='utf-8') as file:
-      contents = file.readlines()
+      contents = file.readlines()[1:]
     learning_num, target_num = tuple(int(value.strip()) for value in contents[0].split(','))
     
     for content in contents[1:]:
@@ -164,7 +164,7 @@ class NNApp:
     self.learning_data, self.target_data = self._read_learning_data(self.data_path['learning'])
     self.error, self.epoch, self.freq, self.interval = self._read_setting_file(self.data_path['setting'])
 
-  def train_network(self, n=1.01):
+  def train_network(self, n=0.99):
     count = 0
     e = 0
     answer = []
