@@ -3,11 +3,12 @@ import os
 from . import Frame, Button, Dialog, TextField, Label
 
 class PropertyDialog(Dialog):
-  def __init__(self, master, title, inputLength, rowSize, onSubmit=None, onResetDisplay=None):
+  def __init__(self, master, title, inputLength, defaultWeightRange, rowSize, onSubmit=None, onResetDisplay=None):
     self.width = 744
     self.height = 364
     self.master = master
     self.inputLength = inputLength
+    self.weightRange = defaultWeightRange
     self.rowSize = rowSize
     self.onSubmit=onSubmit
     self.onResetDisplay=onResetDisplay
@@ -26,12 +27,12 @@ class PropertyDialog(Dialog):
 
     inputLayerSizeFrame = Frame(bodyFrame, width=self.width, height=64)
     inputLayerSizeFrame.pack(fill=tk.BOTH, side=tk.TOP, padx=32)
-    self.inputSize = StyledTextField(inputLayerSizeFrame, defaultValue=self.rowSize, text='size of inputLayer', onSubmit=self.setLabel, side=tk.LEFT, expand=True, padx=8)
+    self.inputSizeField = InputTextField(inputLayerSizeFrame, defaultValue=self.rowSize, text='size of inputLayer', onSubmit=self.setLabel, side=tk.LEFT, expand=True, padx=8)
     self.divideSize = Label(inputLayerSizeFrame, text='x', width=176, side=tk.RIGHT, pady=16, padx=8)
 
     weightRangeFrame = Frame(bodyFrame, width=self.width, height=64)
     weightRangeFrame.pack(fill=tk.BOTH, side=tk.TOP, padx=32)
-    self.weightRange = TextField(weightRangeFrame, defaultValue=8, text='weight range', side=tk.LEFT, expand=True, padx=8)
+    self.weightRangeField = WeightTextField(weightRangeFrame, defaultValue=self.weightRange, text='weight range', side=tk.LEFT, expand=True, padx=8)
     self.weightButton = Button(weightRangeFrame, width=176, height=64, text='fix to maximum absolute', side=tk.RIGHT, anchor=tk.CENTER, pady=16, padx=8)
 
     colorScaleFrame = Frame(bodyFrame, width=self.width, height=64)
@@ -49,19 +50,23 @@ class PropertyDialog(Dialog):
       self.divideSize.setText(self.text)
 
   def validate(self):
-    inputSize = self.inputSize.get()
+    inputSize = self.inputSizeField.get()
     if not inputSize.isdigit():
       return False
     colSize = float(self.inputLength/float(inputSize))
     return colSize.is_integer()
 
   def apply(self):
-    inputSize = self.inputSize.get()
-    if inputSize != '':
-      self.onSubmit(int(inputSize))
-      self.onResetDisplay()
+    inputSize = self.inputSizeField.get()
+    weightRange = self.weightRangeField.get()
+    if '' in [inputSize, weightRange]:
+      return
+    if self.rowSize == inputSize and self.weightRange == weightRange:
+      return
 
-class StyledTextField(TextField):
+    self.onResetDisplay(*self.onSubmit(int(inputSize), float(weightRange)))
+
+class InputTextField(TextField):
   def __init__(self, master, onSubmit=False, **kwargs):
     self.onSubmit = onSubmit
     vcmd = (master.register(self.validate_inputLength))
@@ -71,3 +76,17 @@ class StyledTextField(TextField):
     if P.isdigit() or P == '':
       master.onSubmit(P)
       return True
+
+class WeightTextField(TextField):
+  def __init__(self, master, **kwargs):
+    vcmd = (master.register(self.validate_float))
+    super().__init__(master, multiple=False, vcmd=vcmd, validate='key', **kwargs)
+
+  def validate_float(master, P):
+    if P == '':
+      return True
+    string = P.replace('.', '', 1)
+    print(string)
+    return string.isdigit()
+      
+

@@ -32,9 +32,9 @@ class NetworkDialog(DialogFrame):
     self.connection = DisplayConnection(rightFrame, width=self.width//2-colorbarWidth, height=self.height, layers=self.layers)
     colorscaleFrame = ColorBar(rightFrame, width=colorbarWidth)
 
-  def onResetDisplay(self, inputSize):
-    self.connection.setInputSize(inputSize)
-    self.connection.replot()
+  def onResetDisplay(self, inputSize=None, weightRange=None):
+    self.connection.replot(inputSize, weightRange)
+    self.onUpdateDisplay()
 
   def onUpdateDisplay(self, func=None):
     items = func() if bool(func) else self.onUpdate()
@@ -120,6 +120,7 @@ class DisplayConnection(Frame):
     self.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
     self.canvas = []
     self.inputSize = 1
+    self.colorRange = 2
     self.create_boxes()
 
   def get_maxmin_flatter(self, array, nest=2):
@@ -128,28 +129,25 @@ class DisplayConnection(Frame):
     return max(array), min(array)
 
   def update_boxes(self, layerOuts, weights):
-    maxScale = 2
     for canvas in self.canvas:
       for tag in canvas.get_tags():
         values = tag.split('-')[1:]
         n = [int(value.split(':')[1]) for value in values]
         if 'weight' in tag:
-          minimum, maximum = self.get_maxmin_flatter(weights[n[0]-1], 2)
-          scale = abs(minimum) if abs(minimum) > abs(maximum) else abs(maximum)
-          scale = maxScale if scale < maxScale else scale
           color = weights[n[0]-1][n[1]][n[2]]
-          canvas.update_color(tag, color, scale)
+          canvas.update_color(tag, color, self.colorRange)
         else:
           color = layerOuts[n[0]][n[1]]
           canvas.update_color(tag, color, 1)
     self.update()
 
-  def setInputSize(self, size):
-    self.inputSize = size
-
-  def replot(self):
+  def replot(self, size=None, scale=None):
     for canvas in self.canvas:
       canvas.destroy()
+    if size:
+      self.inputSize = size
+    if scale:
+      self.colorRange = scale
     self.canvas = []
     self.create_boxes()
 
@@ -208,12 +206,12 @@ class Canvas(Frame):
     self.canvas.bind('<Button-1>', self.click)
     self.canvas.pack()
   
-  def create_colorscale(self, num):
-    scale = int(255*num if -1 < num < 1 else 255 if num > 0 else -255)
+  def create_colorscale(self, num, maxValue):
+    scale = int(255*(num/maxValue) if -1 < num/maxValue < 1 else 255 if num > 0 else -255)
     return  f'#0000{scale:02x}' if scale >= 0 else f'#{abs(scale):02x}0000'
   
   def update_color(self, tag, color, maxValue=1):
-    self.canvas.itemconfigure(tag, **{ 'fill': self.create_colorscale(color/maxValue) })
+    self.canvas.itemconfigure(tag, **{ 'fill': self.create_colorscale(color, maxValue) })
 
   def get_tags(self):
     ids = self.canvas.find_all()
