@@ -56,6 +56,7 @@ class CreateLearningDataDialog(Dialog):
       { 'text': 'cancel', **cancelProps, 'command': self.cancel }
     ]
     self.actions = ButtonBox(master=master, width=self.width, children=self.footer, padx=32)
+    self.actions.buttons['make learning data']['state'] = tk.DISABLED
 
   def loadLearningData(self):
     fpath = self._selectLoadFile()
@@ -73,6 +74,7 @@ class CreateLearningDataDialog(Dialog):
       self.inputList.insert(tk.END, ' '.join([str(d) for d in idata]))
     for tdata in targetData:
       self.targetList.insert(tk.END, ' '.join([str(d) for d in tdata]))
+    self.actions.buttons['make learning data']['state'] = tk.NORMAL
 
   def makeLearningData(self):
     inputData = self.inputList.getItems()
@@ -135,6 +137,8 @@ class CreateLearningDataDialog(Dialog):
     self.inputList.delete(_index)
     self.targetList.delete(_index)
     self.selectIndex = None
+    if len(self.inputList.getItems()) == 0:
+      self.actions.buttons['make learning data']['state'] = tk.DISABLED
 
   def replaceListItem(self):
     index = self.selectIndex
@@ -155,6 +159,7 @@ class CreateLearningDataDialog(Dialog):
     _index = index if index != None else tk.END
     self.inputList.insert(_index, inputData)
     self.targetList.insert(_index, targetData)
+    self.actions.buttons['make learning data']['state'] = tk.NORMAL
 
 class HeaderButton(Button):
   def __init__(self, master, text='', width=80, height=48, padx=8, command=None):
