@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import filedialog
 import os
 from . import Frame, Button, Dialog, Entry, Listbox, ButtonBox, Label
 
@@ -55,6 +56,7 @@ class CreateLearningDataDialog(Dialog):
       { 'text': 'cancel', **cancelProps, 'command': self.cancel }
     ]
     self.actions = ButtonBox(master=master, width=self.width, children=self.footer, padx=32)
+    self.actions.buttons['make learning data']['state'] = tk.DISABLED
 
   def loadLearningData(self):
     fpath = self._selectLoadFile()
@@ -72,6 +74,7 @@ class CreateLearningDataDialog(Dialog):
       self.inputList.insert(tk.END, ' '.join([str(d) for d in idata]))
     for tdata in targetData:
       self.targetList.insert(tk.END, ' '.join([str(d) for d in tdata]))
+    self.actions.buttons['make learning data']['state'] = tk.NORMAL
 
   def makeLearningData(self):
     inputData = self.inputList.getItems()
@@ -91,20 +94,20 @@ class CreateLearningDataDialog(Dialog):
   def _selectSaveFile(self):
     typ = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')] 
     iDir = os.path.abspath(os.path.dirname(__file__))
-    fpath = tk.filedialog.asksaveasfilename(filetypes=typ, initialdir=iDir)
+    fpath = filedialog.asksaveasfilename(filetypes=typ, initialdir=iDir)
     return fpath
 
   def _selectLoadFile(self):
     typ = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')] 
     iDir = os.path.abspath(os.path.dirname(__file__))
-    fpath = tk.filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
+    fpath = filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
     return fpath
   
   def setListItem(self):
     if self.selectIndex == None:
       return
-    inputData = self.inputList.get(self.selectIndex)
-    targetData = self.targetList.get(self.selectIndex)
+    inputData = self.inputList.get(self.selectIndex).strip()
+    targetData = self.targetList.get(self.selectIndex).strip()
     if inputData and targetData:
       self.inputEntry.set(inputData)
       self.targetEntry.set(targetData)
@@ -134,6 +137,8 @@ class CreateLearningDataDialog(Dialog):
     self.inputList.delete(_index)
     self.targetList.delete(_index)
     self.selectIndex = None
+    if len(self.inputList.getItems()) == 0:
+      self.actions.buttons['make learning data']['state'] = tk.DISABLED
 
   def replaceListItem(self):
     index = self.selectIndex
@@ -154,6 +159,7 @@ class CreateLearningDataDialog(Dialog):
     _index = index if index != None else tk.END
     self.inputList.insert(_index, inputData)
     self.targetList.insert(_index, targetData)
+    self.actions.buttons['make learning data']['state'] = tk.NORMAL
 
 class HeaderButton(Button):
   def __init__(self, master, text='', width=80, height=48, padx=8, command=None):

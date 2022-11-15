@@ -65,19 +65,19 @@ class NNApp:
     self.biases = biases
   
   def _is_read_operation_file(self, key='stop'):
-    with open(self.config['Paths']['operation'], 'rt', encoding='utf-8') as file:
-      lines = file.readline()
+    with open(self.config['Paths']['operation'], 'rt', encoding='utf-8') as f:
+      lines = f.readline()
     return self.config['Operate'][key] == lines.strip() 
 
   def _write_end_operation_file(self, key='end'):
     if not key in ['stop', 'end']:
       return
-    with open(self.config['Paths']['operation'], 'wt', encoding='utf-8') as file:
-      print(self.config['Operate'][key], file=file)
+    with open(self.config['Paths']['operation'], 'wt', encoding='utf-8') as f:
+      print(self.config['Operate'][key], file=f)
 
   def _output_file(self, fpath, string, write_type='at'):
-    with open(fpath, write_type, encoding='utf-8') as file:
-      print(string, file=file)
+    with open(fpath, write_type, encoding='utf-8') as f:
+      print(string, file=f)
 
   def createHeader(self, input_num=2, hidden_num=2, output_num=1):
     fpaths = [self.data_path[key] for key in ['construction', 'output']]

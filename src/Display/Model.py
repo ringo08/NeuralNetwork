@@ -160,7 +160,6 @@ class Model:
     if not any([k in data.keys() for k in learningColumns]):
       print('not found items')
       return
-    self._makeBaseDir()
     headerColumns = ','.join([data for data in learningColumns])
     self._output_file(fpath, headerColumns, write_type='wt')
 
