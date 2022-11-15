@@ -104,8 +104,8 @@ class CreateLearningDataDialog(Dialog):
   def setListItem(self):
     if self.selectIndex == None:
       return
-    inputData = self.inputList.get(self.selectIndex)
-    targetData = self.targetList.get(self.selectIndex)
+    inputData = self.inputList.get(self.selectIndex).strip()
+    targetData = self.targetList.get(self.selectIndex).strip()
     if inputData and targetData:
       self.inputEntry.set(inputData)
       self.targetEntry.set(targetData)
