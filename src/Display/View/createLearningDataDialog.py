@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import filedialog
 import os
 from . import Frame, Button, Dialog, Entry, Listbox, ButtonBox, Label
 
@@ -91,13 +92,13 @@ class CreateLearningDataDialog(Dialog):
   def _selectSaveFile(self):
     typ = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')] 
     iDir = os.path.abspath(os.path.dirname(__file__))
-    fpath = tk.filedialog.asksaveasfilename(filetypes=typ, initialdir=iDir)
+    fpath = filedialog.asksaveasfilename(filetypes=typ, initialdir=iDir)
     return fpath
 
   def _selectLoadFile(self):
     typ = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')] 
     iDir = os.path.abspath(os.path.dirname(__file__))
-    fpath = tk.filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
+    fpath = filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
     return fpath
   
   def setListItem(self):

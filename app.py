@@ -1,6 +1,6 @@
 import tkinter as tk
 import os
-from src.Display import Controller, Model, Messages, View
+from src.Display import Controller, Model, Messages
 from config.settingConfig import update
 from configparser import ConfigParser, ExtendedInterpolation
 
@@ -16,8 +16,7 @@ class Application(tk.Frame):
 
     self.messages = Messages.Messages
     self.model = Model.Model(config, onError=self.onError)
-    self.view = View.View(self, self.model)
-    self.controller = Controller.Controller(master, self.model, self.view)
+    self.controller = Controller.Controller(master, self.model)
     self.pack(fill='both', expand=True)
 
   # def __del__(self):

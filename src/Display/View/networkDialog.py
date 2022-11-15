@@ -1,11 +1,10 @@
 import tkinter as tk
-import itertools
 from . import Frame, DialogFrame, ColorBar, Graph
 
 class NetworkDialog(DialogFrame):
   def __init__(self, master, title=None, onUpdate=None, onClick=None, defaultLayer=[2, 2, 3]):
-    self.width = 840
-    self.height = 660
+    self.width = 1120
+    self.height = 800
     self.pad = 24
     self.layers = defaultLayer
     self.onClick = onClick
@@ -62,7 +61,7 @@ class Network(Frame):
     self.canvasPad = 16
     self.circlePad = 8
     super().__init__(master, width, height)
-    self.pack(fill=tk.BOTH, side=tk.TOP)
+    self.pack(fill=tk.BOTH, side=tk.TOP, pady=8)
 
     self.canvas = tk.Canvas(self, width=width, height=height, background='white', highlightthickness=0)
     self.canvas.pack()
@@ -117,8 +116,9 @@ class DisplayConnection(Frame):
     self.width = width
     self.height = height
     self.layers = layers
-    self.networkWidth = 340
-    self.networkHeight = 72
+    self.networkWidth = self.width-16
+    self.networkPady = 8
+    self.networkHeight = self.height/((len(self.layers)+1)*2)
     super().__init__(master, width, height)
     self.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
     self.canvas = []
@@ -153,7 +153,7 @@ class DisplayConnection(Frame):
     lineNum = len(self.layers)*2
     for i in range(lineNum):
       index = i//2
-      self.canvas.append(Canvas(self))
+      self.canvas.append(Canvas(self, self.networkWidth, self.networkHeight))
       rows = self.inputSize if index == 0 else 1
       if i%2 == 0:
         self.create_layer_box(index=index, rows=rows)
@@ -193,11 +193,11 @@ class DisplayConnection(Frame):
     return tagName
 
 class Canvas(Frame):
-  def __init__(self, master, width=340, height=72):
+  def __init__(self, master, width=340, height=72, pady=8):
     self.width = width
     self.height = height
     super().__init__(master, width, height)
-    self.pack(fill=tk.BOTH, side=tk.BOTTOM, expand=True)
+    self.pack(fill=tk.BOTH, side=tk.BOTTOM, expand=True, pady=pady)
 
     self.canvas = tk.Canvas(self, width=width, height=height, highlightthickness=0)
     self.canvas.bind('<Button-1>', self.click)

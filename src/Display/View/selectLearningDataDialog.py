@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import filedialog
 import os
 from . import Button, Frame, ButtonBox, Entry, Dialog, Label
 
@@ -42,7 +43,7 @@ class SelectLearningDataDialog(Dialog):
   def _selectLearningDataFile(self):
     typ = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')] 
     iDir = os.path.abspath(os.path.dirname(__file__))
-    fpath = tk.filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
+    fpath = filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
     self.onChangeText(fpath)
   
   def onChangeText(self, text):

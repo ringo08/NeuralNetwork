@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import filedialog
 import os
 from . import Button, Frame, DialogFrame, Label
 
@@ -68,11 +69,11 @@ class TestDialog(DialogFrame):
   def _selectLearningDataFile(self):
     typ = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')] 
     iDir = os.path.abspath(os.path.dirname(__file__))
-    fpath = tk.filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
+    fpath = filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
     return fpath
 
   def _selectPutFile(self):
-    fpath = tk.filedialog.asksaveasfilename(title='Save As')
+    fpath = filedialog.asksaveasfilename(title='Save As')
     if fpath != '':
       return fpath
     

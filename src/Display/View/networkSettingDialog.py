@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import filedialog
 import os
 from . import ButtonBox, Dialog, Frame, Button, Label, Entry
 
@@ -41,7 +42,7 @@ class NetworkSettingDialog(Dialog):
 
   def selectNetwork(self):
     iDir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')
-    fpath = tk.filedialog.askdirectory(title='Load Network Directory', initialdir=iDir)
+    fpath = filedialog.askdirectory(title='Load Network Directory', initialdir=iDir)
     return fpath
 
   def setLabel(self, string=''):
