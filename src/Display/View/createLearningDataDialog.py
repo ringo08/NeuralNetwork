@@ -152,8 +152,8 @@ class CreateLearningDataDialog(Dialog):
     self.targetEntry.set('')
 
   def addData(self, index=None):
-    inputData = self.inputEntry.get()
-    targetData = self.targetEntry.get()
+    inputData = self.inputEntry.get().strip()
+    targetData = self.targetEntry.get().strip()
     if not (inputData and targetData):
       return
     _index = index if index != None else tk.END
