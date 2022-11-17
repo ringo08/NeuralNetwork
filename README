@@ -1,5 +1,6 @@
 require Tkinter
 
+git clone https://github.com/ringo08/NeuralNetwork
 cd ./NeuralNetwork
 
 
