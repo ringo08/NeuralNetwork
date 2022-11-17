@@ -128,6 +128,7 @@ class Model:
   def createNetwork(self, out=False):
     if self.process:
       self.process.terminate()
+      self.process = None
     self.writeOperation('init')
     self.network = self.NNApp.createNetwork(out=out)
     self.isSaved = False

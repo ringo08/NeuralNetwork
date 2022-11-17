@@ -24,13 +24,15 @@ class Controller:
     self.bind_UI()
 
   def bind_UI(self):
-    self.menu.setCommand('network', self.overwriteNetwork)
-    self.menu.setCommand('property', self.openPropertyDialog)
-    self.menu.setCommand('train', self.openTrainDialog)
-    self.menu.setCommand('createData', self.openCreateLearningDataDialog)
-    self.menu.setCommand('test', self.openTestDataDialog)
-    self.menu.setCommand('save', self.saveNetwork)
-    self.menu.setCommand('quit', self.quit)
+    self.menu.setCommands({
+      'network': self.overwriteNetwork,
+      'property': self.openPropertyDialog,
+      'train': self.openTrainDialog,
+      'createData': self.openCreateLearningDataDialog,
+      'test': self.openTestDataDialog,
+      'save': self.saveNetwork,
+      'quit': self.quit
+    })
 
   def overwriteNetwork(self):
     isSave = False
