@@ -58,7 +58,7 @@ class SelectLearningDataDialog(Dialog):
       'freq': self.updateFrequency.get(),
       'interval': self.updateInterval.get()
     })
-    self.onSelectLearningData(self.dataPath)
+    self.onSelectLearningData(float(self.minimum.get()), self.dataPath)
 
 class StyledTextField(Entry):
   def __init__(self, master, width=256, height=48, text='', defaultValue=0, bindText=''):

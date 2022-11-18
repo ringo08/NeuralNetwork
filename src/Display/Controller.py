@@ -101,13 +101,17 @@ class Controller:
       title='create network'
     )
     return dialog
+  
+  def onSelectLearningData(self, minimum, fpath):
+    self.model.onSelectLearningDataForTrain(fpath)
+    self.NetworkDialog.setMinimumError(minimum)
 
   def openSelectLearningDataDialog(self, master):
     return SelectLearningDataDialog(
       master=master,
       title='learning prop',
       defaultPath=self.model.learningDataPath,
-      onSelectLearningData=self.model.onSelectLearningDataForTrain,
+      onSelectLearningData=self.onSelectLearningData,
       writeNetworkParam=self.model.writeNetworkParam
     )
 

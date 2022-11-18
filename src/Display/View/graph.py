@@ -9,62 +9,71 @@ def particleCount(decay, p0, time):
 class Graph(Frame):
   def __init__(self, master, width=420, height=220):
     super().__init__(master, width=width, height=height)
-    self.tickSize = (24, 24)
-    self.canvasSize = (width-self.tickSize[0], height-self.tickSize[1])
-    self.ytickCanvas = tk.Canvas(self, highlightthickness=0)
-    self.xtickCanvas = tk.Canvas(self, highlightthickness=0)
-    self.graphCanvas = tk.Canvas(self, background="gray", highlightthickness=0)
-    self.graphCanvas.bind("<Button-1>", self.click)
-    self.init_graph()
+    self.tickSize = 24
+    self.canvasSize = (width-self.tickSize, height-self.tickSize)
     self.pack(fill=tk.BOTH, expand=True)
-
-  def init_graph(self):
+    self.maximum = math.log10(10)
+    self.minimum = math.log10(0.1)
     self.data = []
     self.maxPoint = 0
-    self.line = self.graphCanvas.create_line((0, self.canvasSize[1]//2, self.canvasSize[0], self.canvasSize[1]//2), tag='line', width=1, fill='black')
     self.ytickPoints = []
     self.ytickLabels = []
     self.xtickPoints = []
     self.xtickLabels = []
-    self.ytickCanvas.place(x=0, y=0, width=self.tickSize[0], height=self.canvasSize[1])
-    self.xtickCanvas.place(x=self.tickSize[0], y=self.canvasSize[1], width=self.canvasSize[0], height=self.tickSize[1])
-    self.graphCanvas.place(x=self.tickSize[0], y=0, width=self.canvasSize[0], height=self.canvasSize[1])
+    self._init_graph()
+    self.graph_plot()
+
+  def _init_graph(self):
+    self.graphCanvas = tk.Canvas(self, background="gray", highlightthickness=0)
+    self.graphCanvas.place(x=self.tickSize, y=0, width=self.canvasSize[0], height=self.canvasSize[1])
+    self.graphCanvas.bind("<Button-1>", self.click)
+    self.line = self.graphCanvas.create_line((0, self.canvasSize[1]//2, self.canvasSize[0], self.canvasSize[1]//2), tag='line', width=1, fill='black')
+
+    self.ytickCanvas = tk.Canvas(self, highlightthickness=0)
+    self.xtickCanvas = tk.Canvas(self, highlightthickness=0)
+    self.ytickCanvas.place(x=0, y=0, width=self.tickSize, height=self.canvasSize[1])
+    self.xtickCanvas.place(x=self.tickSize, y=self.canvasSize[1], width=self.canvasSize[0], height=self.tickSize)
 
   def click(self, event):
     print(event)
-  
+
   def clear(self):
-    self.init_graph()
+    self._init_graph()
+    
+  def setMinimum(self, minimum):
+    self.minimum = math.log10(minimum*0.01)
 
   def addData(self, x):
     self.data.append(x)
-    self.maxPoint = len(self.data)
     self.graph_plot()
 
   def setData(self, datas):
     self.data = datas
-    self.maxPoint = len(self.data)
     self.graph_plot()
 
   def graph_plot(self):
     w, h = self.canvasSize
-    max_y = math.log10(10)
-    min_y = math.log10(min(self.data)*1e-2)
-    max_X = len(self.data)
-    if len(self.data) < 2:
+    yRange = (abs(self.minimum) + abs(self.maximum))
+    self.maxPoint = len(self.data)
+  
+    if self.maxPoint < 1:
       return
-
+    xtickPoint = int(self.maxPoint/10)
+    if xtickPoint > 0:
+      xtick = { n: (w/self.maxPoint)*n for n in range(1, self.maxPoint+1, xtickPoint) }
+    else:
+      xtick = { n: (w/self.maxPoint)*n for n in range(1, self.maxPoint) }
+    ytick = { l: (h*n)/yRange for l, n in zip(range(int(self.maximum), int(self.minimum-1), -1), range(int(yRange+1))) }
+    self.tick_plot(xtick, ytick)
+    
+    if self.maxPoint < 2:
+      return
     coords = []
     for n in range(self.maxPoint):
       x = (w * n) / self.maxPoint
       coords.append(x)
-      coords.append(h*(math.log10(self.data[n])/(min_y+max_y)))
-    
-    xn = 5
-    xtick = {n: (w*n)/max_X for n in range(1, self.maxPoint+1) if n % xn==0}
-    ytick = {t: h*t/int(min_y+max_y) for t in range(int(min_y+max_y), -1)}
-    self.tick_plot(xtick, ytick)
-    
+      coords.append(h*(math.log10(self.data[n])/(self.maximum+self.minimum)))
+
     self.graphCanvas.coords('line', *coords)
     self.graphCanvas.update()
     self.update()
@@ -83,20 +92,18 @@ class Graph(Frame):
     self.xtickPoints = self._create_ticks_points(self.xtickCanvas, ticks=xtick.values(), oriental='x')
     self.xtickLabels = self._create_tick_labels(self.xtickCanvas, labels=list(xtick.keys()), ticks=xtick.values(), oriental='x')
 
-  def _create_tick_labels(self, canvas, labels=[], ticks=[], oriental='x'):
-    w, h = self.tickSize
+  def _create_tick_labels(self, canvas, labels=[], ticks=[], tickPad=4, oriental='x'):
     if oriental == 'x':
-      labels = [canvas.create_text(tick, 4, text=int(labels[i]), anchor=tk.N, font=('', 10)) for i, tick in enumerate(ticks)]
+      labels = [canvas.create_text(tick, tickPad, text=int(labels[i]), anchor=tk.N, font=('', 10)) for i, tick in enumerate(ticks)]
     elif oriental == 'y':
-      labels = [canvas.create_text(0, tick, text=int(labels[i]), anchor=tk.W, font=('', 10)) for i, tick in enumerate(ticks)]
+      labels = [canvas.create_text(tickPad, tick+tickPad, text=int(labels[i]), anchor=tk.W, font=('', 10)) for i, tick in enumerate(ticks)]
 
     return labels
 
   def _create_ticks_points(self, canvas, ticks=[], tickLen=4, oriental='x'):
-    w, h = self.tickSize
     if oriental == 'x':
       points = [(tick, 0, tick, tickLen) for tick in ticks]
     elif oriental == 'y':
-      points = [(w-tickLen, tick, w, tick) for tick in ticks]
+      points = [(self.tickSize-tickLen, tick, self.tickSize, tick) for tick in ticks]
 
     return [canvas.create_line(*point) for point in points]

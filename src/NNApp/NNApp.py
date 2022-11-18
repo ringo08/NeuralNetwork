@@ -177,6 +177,8 @@ class NNApp:
     while True:
       if self._is_read_operation_file('stop'):
         stoped = True
+        e = 0
+        count = 0
       if not self._is_read_operation_file('start'):
         if score and self._is_read_operation_file('init'):
           self.initWeight()

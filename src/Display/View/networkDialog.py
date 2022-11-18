@@ -32,6 +32,9 @@ class NetworkDialog(DialogFrame):
     self.connection = DisplayConnection(rightFrame, width=self.width//2-colorbarWidth, height=self.height, layers=self.layers)
     colorscaleFrame = ColorBar(rightFrame, width=colorbarWidth)
 
+  def setMinimumError(self, minimum):
+    self.graph.setMinimum(minimum)
+
   def onResetDisplay(self, inputSize=None, weightRange=None):
     self.connection.replot(inputSize, weightRange)
     self.onUpdateDisplay(lambda: self.onUpdate(-1))
