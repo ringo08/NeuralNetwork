@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import filedialog
 import os
 from . import Frame, Button, Dialog, TextField, Label
 
@@ -24,6 +25,12 @@ class PropertyDialog(Dialog):
   def _body(self, master):
     bodyFrame = Frame(master, width=self.width, height=self.height)
     bodyFrame.pack(fill=tk.BOTH, anchor=tk.CENTER, padx=32, pady=16, expand=True)
+    
+    referenceFrame = Frame(master, width=624, height=48)
+    referenceFrame.pack(fill=tk.X, ipady=4, ipadx=16, pady=16, padx=48)
+
+    self.dataPathLabel = Label(referenceFrame, width=480, text=self.dataPath if self.dataPath else 'no data', side=tk.LEFT, expand=True)
+    self.dataPathButton = Button(referenceFrame, text='Browse', width=128, side=tk.RIGHT, command=self._selectDirectory)
 
     inputLayerSizeFrame = Frame(bodyFrame, width=self.width, height=64)
     inputLayerSizeFrame.pack(fill=tk.BOTH, side=tk.TOP, padx=32)
@@ -55,6 +62,13 @@ class PropertyDialog(Dialog):
       return False
     colSize = float(self.inputLength/float(inputSize))
     return colSize.is_integer()
+
+  def _selectDirectory(self):
+    iDir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')
+    fpath = filedialog.askdirectory(title='reference Directory', initialdir=iDir)
+    if fpath:
+      self.dataPathLabel.setText(fpath)
+  
 
   def apply(self):
     inputSize = self.inputSizeField.get()

@@ -44,7 +44,8 @@ class SelectLearningDataDialog(Dialog):
     typ = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')] 
     iDir = os.path.abspath(os.path.dirname(__file__))
     fpath = filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
-    self.onChangeText(fpath)
+    if fpath:
+      self.onChangeText(fpath)
   
   def onChangeText(self, text):
     if text.strip():

@@ -2,7 +2,6 @@ import os, shutil
 from ..NNApp import NNApp
 from . import Messages
 from multiprocessing import Process
-from config.settingConfig import update
 
 def is_num(s):
   try:
@@ -234,7 +233,7 @@ class Model:
     flag = (operation == self.config['Operate']['start']) or isInit
     if not (flag or fileIndex):
       return
-    lines = self._read_file(self.dataPath['param'])
+    lines = self._read_file(self.dataPath['parameter'])
     if lines is None:
       return
     if len(lines)-3 < abs(getIndex):
@@ -341,10 +340,11 @@ class Model:
     return [line.strip().upper() for line in lines][0]
 
 # Property Dialog
-  def propertySubmit(self, inputSize, colorRange):
+  def propertySubmit(self, fpath, inputSize, colorRange):
+    self.referencePath = fpath
     self.inputSize = inputSize
     self.colorRange = colorRange
-    return self.inputSize, self.colorRange
+    return fpath, self.inputSize, self.colorRange
   
   def getParam(self, layer, neuron, weight=None):
     weights, biases = self.readNetworkFile(-1)

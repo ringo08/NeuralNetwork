@@ -87,7 +87,7 @@ class NNApp:
       self._output_file(fpath, f"{self._print_bw('h', input_num, hidden_num)}, {self._print_bw('o', hidden_num, output_num)}")  
 
   def createParamHeader(self, input_num=2, hidden_num=2, output_num=1):
-    fpath = self.data_path['param']
+    fpath = self.data_path['parameter']
     self._output_file(fpath, "input_num, hidden_num, output_num", write_type='wt')
     self._output_file(fpath, f"{input_num}, {hidden_num}, {output_num}")
     numdict = { 'input_num': input_num, 'hidden_num': hidden_num, 'output_num': output_num }
@@ -116,7 +116,7 @@ class NNApp:
     self.network.layers[layer_index].neurons[neuron_index].cut(w_index)
     self.output_network(self.data_path['construction'])
     self.output_network(self.data_path['output'])
-    self.output_param(self.data_path['param'], index=0)
+    self.output_param(self.data_path['parameter'], index=0)
     return True
 
   def createNetwork(self, readFile=None, out=False):
@@ -129,7 +129,7 @@ class NNApp:
     if out:
       self.output_network(fpath)
       self.output_network(self.data_path['output'])
-      self.output_param(self.data_path['param'], index=0)
+      self.output_param(self.data_path['parameter'], index=0)
     return (self.input_num, self.hidden_num, self.output_num)
 
   def output_network(self, outFile, sep=','):
@@ -204,7 +204,7 @@ class NNApp:
         # print(f'epoch: {e:3}, loss: {answer[-1], score}')
         self.network.fit(self.learning_data[e%len(self.target_data)])
         self.output_network(self.data_path['output'])
-        self.output_param(self.data_path['param'], index=e%len(self.target_data), score=self.score)
+        self.output_param(self.data_path['parameter'], index=e%len(self.target_data), score=self.score)
         if e >= self.epoch:
           self._write_end_operation_file('stop')
           e = 0
@@ -237,13 +237,15 @@ def main(config):
   nnapp.train_network(n=0.99)
 
 if __name__ == '__main__':
-  from config.settingConfig import update
+  from config.settingConfig import configUpdate, configWrite
   from configparser import ConfigParser, ExtendedInterpolation
   config = ConfigParser(interpolation=ExtendedInterpolation())
   path_root = os.getcwd()
 
-  path_config = os.path.join(path_root, 'config/config.ini')
+  path_config = os.path.join(path_root, 'config', 'config.ini')
+  if not os.path.isfile(path_config):
+    configWrite(path_config)
 
-  update(config, { 'Paths': {'root': path_root }}, path_config)
+  configUpdate(config, { 'Paths': {'root': path_root }}, path_config)
   config.read(path_config)
   main(config)

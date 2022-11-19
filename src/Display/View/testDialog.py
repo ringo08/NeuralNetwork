@@ -45,7 +45,7 @@ class TestDialog(DialogFrame):
 
     defaultText = self.testDataPath if self.testDataPath else 'no file path'
     self.fileLabel = Label(initButtonsFrame, text=defaultText, width=276, side=tk.TOP, expand=True)
-    self.loadData = Button(initButtonsFrame, text='load data', side=tk.TOP, command=lambda: self.fileLabel.setText(self._selectLearningDataFile()))
+    self.loadData = Button(initButtonsFrame, text='load data', side=tk.TOP, command=self.changeFile)
     self.startTest = Button(initButtonsFrame, text='start', height=64, side=tk.LEFT, expand=True, command=self.onStart)
     self.closeTest = Button(initButtonsFrame, text='close', height=64, side=tk.LEFT, expand=True, command=self.master.destroy)
 
@@ -65,6 +65,11 @@ class TestDialog(DialogFrame):
   
   def _init_footer(self, master):
     pass
+
+  def changeFile(self):
+    fpath = self._selectLearningDataFile()
+    if fpath:
+      self.fileLabel.setText(fpath)
   
   def _selectLearningDataFile(self):
     typ = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')] 
