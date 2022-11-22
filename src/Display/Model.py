@@ -88,7 +88,7 @@ class Model:
         self.onError(e)
 
   def readNetworkFile(self, fileIndex=None, isInit=False):
-    fpath = self.dataPath['construction'] if isInit else self.dataPath['output']
+    fpath = self.dataPath['construction'] if isInit else self.dataPath['parameter']
     getIndex = fileIndex if fileIndex != None else -2
     with open(fpath, 'rt', encoding='utf-8') as file:
       lines = file.readlines()
@@ -237,7 +237,7 @@ class Model:
     flag = (operation == self.config['Operate']['start']) or isInit
     if not (flag or bool(fileIndex)):
       return
-    lines = self._read_file(self.dataPath['parameter'])
+    lines = self._read_file(self.dataPath['output'])
     if lines is None:
       return
     if len(lines)-3 < abs(getIndex):
@@ -260,23 +260,25 @@ class Model:
     targetData = datas[1][index] if datas else [0]*output_num
     return (isInit, loss, [inputData, hidden_out, output_out, targetData], weights)
 
-  def getLearningData(self, fpath):
+  def validateLearingData(self, fpath):
     if not os.path.isfile(fpath):
-      return
+      return False
     datas = self._read_file(fpath)
     data = [int(d.strip()) for d in datas[1].split(',')]
     validateInOut = [self.network[0], self.network[-1]]
     if validateInOut != data:
       self.onError('not equal from network input or output to learning data')
+      return False
+    return True
 
   # Select learning data for train
   def onSelectLearningDataForTrain(self, fpath):
-    self.getLearningData(fpath)
+    if not fpath:
+      return False
     if os.path.isfile(self.dataPath['learning']):
       os.remove(self.dataPath['learning'])
     shutil.copyfile(fpath, self.dataPath['learning'])
     self.learningDataPath = fpath
-    return fpath
   
   # Load setting data file
   def readSettingFile(self):
@@ -301,12 +303,12 @@ class Model:
 # Test Dialog Functions
   def readLearningData(self, fpath):
     self.testDataPath = fpath
-    self.getLearningData(fpath)
+    self.validateLearingData(fpath)
     self.testMaxIndex = self.NNApp.setTestData(fpath)
 
   def startTest(self):
     self.testAnswers = []
-    self.NNApp.createNetwork(readFile=self.dataPath['output'], out=False)
+    self.NNApp.createNetwork(readFile=self.dataPath['parameter'], out=False)
     for i in range(self.testMaxIndex):
       self.testAnswers.append(self.NNApp.test(i))
     return len(self.testAnswers)

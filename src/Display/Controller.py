@@ -107,8 +107,11 @@ class Controller:
     return dialog
   
   def onSelectLearningData(self, minimum, fpath):
+    if not self.model.validateLearingData(fpath):
+      return False
     self.model.onSelectLearningDataForTrain(fpath)
     self.NetworkDialog.setMinimumError(minimum)
+    return True
 
   def openSelectLearningDataDialog(self, master):
     return SelectLearningDataDialog(

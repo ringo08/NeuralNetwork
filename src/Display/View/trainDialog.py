@@ -50,7 +50,7 @@ class TrainDialog(DialogFrame):
     pass
 
   def isSelectLearningData(self):
-    self.dataPath = self.onSettingData()
+    self.dataPath = self.onSettingData().dataPath
     self.trainButton['state'] = tk.NORMAL if self.dataPath else tk.DISABLED
 
   def isInitWeight(self):

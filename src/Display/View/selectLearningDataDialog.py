@@ -46,13 +46,16 @@ class SelectLearningDataDialog(Dialog):
       self.dataPath = fpath
 
   def apply(self):
+    flag = self.onSelectLearningData(float(self.minimum.get()), self.dataPath)
+    if not flag:
+      self.dataPath = ''
+      return
     self.writeNetworkParam({
       'error': self.minimum.get(),
       'epoch': self.epochs.get(),
       'freq': self.updateFrequency.get(),
       'interval': self.updateInterval.get()
     })
-    self.onSelectLearningData(float(self.minimum.get()), self.dataPath)
 
 class StyledTextField(Entry):
   def __init__(self, master, width=256, height=48, text='', defaultValue=0, bindText=''):

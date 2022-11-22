@@ -53,7 +53,7 @@ class Graph(Frame):
     self.graph_plot()
   
   def graph_plot(self):
-    w, h = self.canvasSize
+    width, height = self.canvasSize
     minimum = self.minimum - 2
     yRange = (abs(minimum) + abs(self.maximum))
     self.maxPoint = len(self.data)
@@ -62,19 +62,20 @@ class Graph(Frame):
       return
     xtickPoint = int(self.maxPoint/10)
     if xtickPoint > 0:
-      xtick = { n: (w/self.maxPoint)*n for n in range(1, self.maxPoint+1, xtickPoint) }
+      xtick = { n: (width/self.maxPoint)*n for n in range(1, self.maxPoint+1, xtickPoint) }
     else:
-      xtick = { n: (w/self.maxPoint)*n for n in range(1, self.maxPoint) }
-    ytick = { l: (h*n)/yRange for l, n in zip(range(int(self.maximum), int(minimum-1), -1), range(int(yRange+1))) }
+      xtick = { n: (width/self.maxPoint)*n for n in range(1, self.maxPoint) }
+    h = height/yRange
+    ytick = { l: h*n for l, n in zip(range(int(self.maximum), int(minimum-1), -1), range(int(yRange+1))) }
     self.tick_plot(xtick, ytick)
     
     if self.maxPoint < 2:
       return
     coords = []
     for n in range(self.maxPoint):
-      x = (w * n) / self.maxPoint
+      x = (width * n) / self.maxPoint
       coords.append(x)
-      coords.append(h*(math.log10(self.data[n])/(-1*yRange)))
+      coords.append(h*(-1*math.log10(self.data[n])+self.maximum))
 
     self.graphCanvas.coords('line', *coords)
     self.graphCanvas.update()
