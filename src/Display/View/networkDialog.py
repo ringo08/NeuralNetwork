@@ -45,7 +45,7 @@ class NetworkDialog(DialogFrame):
       self.updateProgress(len(data), data[-1])
   
   def updateProgress(self, length, last):
-    text = 'epoch: {}, {:.3e} / {:.3e}'.format(length, last, 10**(self.graph.minimum))
+    text = 'epoch: {}, {:.3e} / {:.3e}'.format(1+length, last, 10**(self.graph.minimum))
     self.progress.setText(text)
 
   def onResetDisplay(self, inputSize=None, weightRange=None):

@@ -3,7 +3,7 @@ import os
 from . import Button, Frame, DialogFrame
 
 class TrainDialog(DialogFrame):
-  def __init__(self, master, title=None, dataPath='', onSettingData=None, onLearnNetwork=None, onInitWeight=None):
+  def __init__(self, master, title=None, dataPath='', onSettingData=None, onChangeTrainOperation=None, onLearnNetwork=None, onInitWeight=None):
     self.width = 196
     self.height = 200
     self.master = master
@@ -11,6 +11,7 @@ class TrainDialog(DialogFrame):
     self.onSettingData = onSettingData
     self.dataPath = dataPath
     self.updateTime = 100
+    self.onChangeTrainOperation = onChangeTrainOperation
     self.onLearnNetwork = onLearnNetwork
     self.onInitWeight = onInitWeight
     self.afterId = None
@@ -32,17 +33,19 @@ class TrainDialog(DialogFrame):
     root.pack(fill=tk.BOTH, anchor=tk.CENTER, side=tk.TOP, padx=16)
   
   def onClick(self):
-    self.isStartTrain = not self.isStartTrain
-    self.onToggle(self.isStartTrain)
+    self.isStartTrain = self.onChangeTrainOperation(not self.isStartTrain)
+    self.onToggle()
   
-  def onToggle(self, flag):
-    self.isStartTrain = self.onLearnNetwork(flag)
+  def onToggle(self):
+    self.isStartTrain = self.onLearnNetwork()
     if self.isStartTrain:
       self.trainButton.setLabel('stop')
-      self.afterId = self.after(self.updateTime, lambda: self.onToggle(flag))
+      self.afterId = self.after(self.updateTime, self.onToggle)
     elif self.afterId is not None:
       self.after_cancel(self.afterId)
       self.afterId = None
+      self.trainButton.setLabel('train')
+    else:
       self.trainButton.setLabel('train')
     self.initWeightButton['state'] = tk.DISABLED if self.isStartTrain else tk.NORMAL
     

@@ -67,7 +67,7 @@ class NNApp:
   def _is_read_operation_file(self, key='stop'):
     with open(self.config['Paths']['operation'], 'rt', encoding='utf-8') as f:
       lines = f.readline()
-    return self.config['Operate'][key] == lines.strip() 
+    return self.config['Operate'][key] == lines.strip()
 
   def _write_end_operation_file(self, key='end'):
     if not key in ['stop', 'end']:
@@ -177,16 +177,13 @@ class NNApp:
     while True:
       if self._is_read_operation_file('stop'):
         stoped = True
-        e = 0
-        count = 0
-      if not self._is_read_operation_file('start'):
-        if score and self._is_read_operation_file('init'):
-          self.initWeight()
-          count = 0
-          e = 0
-          answer = []
-          score = []
         continue
+      if score and self._is_read_operation_file('init'):
+        self.initWeight()
+        count = 0
+        e = 0
+        answer = []
+        score = []
       elif stoped:
         stoped = False
         self.createNetwork(readFile=self.data_path['parameter'])
@@ -200,15 +197,14 @@ class NNApp:
       if count%self.freq==0:
         self.score = mean(score)
         answer.append(self.score)
-        e += 1
-        # print(f'epoch: {e:3}, loss: {answer[-1], score}')
-        self.network.fit(self.learning_data[e%len(self.target_data)])
+        index = e%len(self.target_data)
+        self.network.fit(self.learning_data[index])
         self.output_network(self.data_path['parameter'])
-        self.output_layer_out(self.data_path['output'], index=e%len(self.target_data), score=self.score)
+        self.output_layer_out(self.data_path['output'], index=index, score=self.score)
         if e >= self.epoch:
           self._write_end_operation_file('stop')
           e = 0
-          stoped = True
+        e += 1
         if answer[-1] < self.error:
           self._write_end_operation_file('end')
           break

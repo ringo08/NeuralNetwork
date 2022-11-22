@@ -140,8 +140,9 @@ class Controller:
     return TrainDialog(
       master=self.trainDialog,
       dataPath=self.model.learningDataPath,
-      onSettingData=lambda : self.openSelectLearningDataDialog(self.trainDialog),
-      onLearnNetwork=lambda flag: self.model.onLearnNetwork(flag, func=updateDisplay),
+      onSettingData=lambda: self.openSelectLearningDataDialog(self.trainDialog),
+      onLearnNetwork=lambda: self.model.onLearnNetwork(func=updateDisplay),
+      onChangeTrainOperation=self.model.onChangeTrainOperation,
       onInitWeight=lambda: self.model.onInitWeight(func=updateDisplay),
       title='Train'
     )

@@ -208,16 +208,11 @@ class Model:
     self._output_file(fpath, ','.join(columns), write_type=wtype)
     self._output_file(fpath, ','.join([data[column] for column in columns]))
 
-  # Start train network
-  def onLearnNetwork(self, flag: bool, func=None):
+  def onChangeTrainOperation(self, flag):
     if self.readOperation() == self.config['Operate']['end']:
-      func(index=-1)
-      self.process.terminate()
-      return
-
+      return False
     self.writeOperation('start' if flag else 'stop')
-    func()
-    if not self.process:
+    if flag and not self.process:
       if not (os.path.isfile(self.dataPath['learning'])):
         self.onError('learning data file was not found')
         return
@@ -226,6 +221,14 @@ class Model:
         return
       self.process = Process(target=initNNApp, args=(self.NNApp, ))
       self.process.start()
+
+  # Start train network
+  def onLearnNetwork(self, func=None):
+    if self.readOperation() == self.config['Operate']['end']:
+      func(index=-1)
+      self.process.terminate()
+      return False
+    func()
     return self.readOperation() == self.config['Operate']['start']
   
   def onUpdateNetworkParam(self, fileIndex=None):
