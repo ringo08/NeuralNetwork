@@ -11,12 +11,14 @@ from .View import (
   ParamDialog
 )
 import tkinter as tk
+from src.Display.Messages import Messages
 from tkinter import filedialog
 
 class Controller:
-  def __init__(self, master, model):
+  def __init__(self, master, model, message):
     self.master = master
     self.model = model
+    self.message = message
     self.menu = MainMenu(master=master, columns=model.menuColumns)
     self.networkDialog = None
     self.trainDialog = None
@@ -37,7 +39,7 @@ class Controller:
   def overwriteNetwork(self):
     isSave = False
     if os.path.isdir(self.model.basePath):
-      isSave = tk.messagebox.askyesno('config', 'save network before overwrite?')
+      isSave = tk.messagebox.askyesno('config', self.message.get('dialog.message.network.overwrite'))
     if isSave:
       self.saveNetwork()
     
@@ -59,12 +61,12 @@ class Controller:
     self.openNetworkDialog(result)
 
   def saveNetwork(self):
-    fpath = self.getFilePathDialog(title='Save As', isDir=True, isSave=True)
+    fpath = self.getFilePathDialog(title=self.message.get('dialog.title.save.network'), isDir=True, isSave=True)
     self.model.saveNetwork(fpath)
 
   def quit(self):
     if not self.model.isSaved:
-      if tk.messagebox.askyesno('config', 'quit before save?'):
+      if tk.messagebox.askyesno('config', self.message.get('dialog.message.network.close')):
         self.master.destroy()
 
   def openNetworkDialog(self, defaultLayer=[2, 2, 1]):
@@ -102,7 +104,7 @@ class Controller:
     dialog = NetworkSettingDialog(
       master=self.master,
       getFilePathDialog=self.getFilePathDialog,
-      title='create network'
+      title=self.message.get('dialog.title.create.network')
     )
     return dialog
   
@@ -179,7 +181,7 @@ class Controller:
   def getFilePathDialog(self, title, isDir=False, isSave=False):
     types = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')]
     if isSave:
-      return filedialog.asksaveasfilename(title='Save As', initialdir=self.model.referencePath, filetypes='' if isDir else types)
+      return filedialog.asksaveasfilename(title=title, initialdir=self.model.referencePath, filetypes='' if isDir else types)
     if isDir:
       return filedialog.askdirectory(title=title, initialdir=self.model.referencePath)
 

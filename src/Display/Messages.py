@@ -35,37 +35,64 @@ messages = {
     }
   },
   'buttons': {
-
+    'submit': {
+      'en': 'save',
+      'ja': '保存'
+    },
+    'create': {
+      'en': 'create',
+      'ja': '作成'
+    },
+    'cancel': {
+      'en': 'cancel',
+      'ja': 'キャンセル'
+    }
   },
   'dialog': {
     'title': {
-      'network': {
-        'en': 'create network',
-        'ja': 'ネットワーク作成'
+      'create': {
+        'network': {
+          'en': 'create network',
+          'ja': 'ネットワーク作成'
+        }
+      },
+      'select': {
+        'learningData': {
+          'en': 'select a file for learning data to be loaded',
+          'ja': '読み込む学習データ用ファイルを選択する'
+        }
+      },
+      'save': {
+        'network': {
+          'en': 'Network save as',
+          'ja': 'ネットワークの名前をつけて保存する'
+        },
+        'network': {
+          'en': 'Network save as',
+          'ja': 'ネットワークの名前をつけて保存する'
+        }
       }
     },
-    'button': {
-      'submit': {
-        'en': 'save',
-        'ja': '保存'
-      },
-      'create': {
-        'en': 'create',
-        'ja': '作成'
-      },
-      'cancel': {
-        'en': 'cancel',
-        'ja': 'キャンセル'
+    'message': {
+      'network': {
+        'overwrite': {
+          'en': 'save network before overwrite?',
+          'ja': '上書き前に保存しますか?'
+        },
+        'close': {
+          'en': 'save network before close?',
+          'ja': '閉じる前にネットワークを保存しますか?'
+        }
       }
     }
   }
 }
 
 class Messages:
-  def __init__(self, config):
-    self.lang = config['Config']['lang']
+  def __init__(self, config=None):
+    self.lang = config['Config']['lang'] if config else 'en'
     self.messages = messages
-  
+
   def get(self, string):
     keys = string.split('.')
     message = self.messages

@@ -14,9 +14,9 @@ class Application(tk.Frame):
     self.config(bg='#FAFAFA')
     self.configProp = config
 
-    self.messages = Messages.Messages
-    self.model = Model.Model(config, onError=self.onError)
-    self.controller = Controller.Controller(master, self.model)
+    message = Messages.Messages(config)
+    self.model = Model.Model(config, message, onError=self.onError)
+    self.controller = Controller.Controller(master, self.model, message)
     self.pack(fill='both', expand=True)
 
   # def __del__(self):

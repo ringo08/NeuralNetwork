@@ -1,6 +1,6 @@
 import os, shutil
-from ..NNApp import NNApp
-from . import Messages
+from src.NNApp.NNApp import NNApp
+from src.Display.Messages import Messages
 from multiprocessing import Process
 from config.settingConfig import configUpdate
 
@@ -13,7 +13,7 @@ def is_num(s):
     return True
 
 class Model:
-  def __init__(self, config, onError=None):
+  def __init__(self, config, message, onError=None):
     self.config = config
     self.onError = onError
     self.NNApp = NNApp(config)
@@ -30,16 +30,16 @@ class Model:
     self.referencePath = self.config['Paths']['reference']
     self.network = []
     self.dataPath = { key: self.config['Paths'][key] for key in self.config['Datas'] }
-    self.messages = Messages.Messages(config)
+    self.message = message
     self.menuColumns = [
-      { 'value': 'network', 'label': self.messages.get('menu.network'), 'always': True },
-      { 'value': 'onehot', 'label': self.messages.get('menu.onehot'), 'always': False },
-      { 'value': 'createData', 'label': self.messages.get('menu.createData'), 'always': True },
-      { 'value': 'train', 'label': self.messages.get('menu.train'), 'always': False },
-      { 'value': 'test', 'label': self.messages.get('menu.test'), 'always': False },
-      { 'value': 'save', 'label': self.messages.get('menu.save'), 'always': False },
-      { 'value': 'property', 'label': self.messages.get('menu.property'), 'always': False },
-      { 'value': 'quit', 'label': self.messages.get('menu.quit'), 'always': True } 
+      { 'value': 'network', 'label': self.message.get('menu.network'), 'always': True },
+      { 'value': 'onehot', 'label': self.message.get('menu.onehot'), 'always': False },
+      { 'value': 'createData', 'label': self.message.get('menu.createData'), 'always': True },
+      { 'value': 'train', 'label': self.message.get('menu.train'), 'always': False },
+      { 'value': 'test', 'label': self.message.get('menu.test'), 'always': False },
+      { 'value': 'save', 'label': self.message.get('menu.save'), 'always': False },
+      { 'value': 'property', 'label': self.message.get('menu.property'), 'always': False },
+      { 'value': 'quit', 'label': self.message.get('menu.quit'), 'always': True } 
     ]
     self.sep = ','
 
