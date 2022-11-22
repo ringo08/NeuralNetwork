@@ -1,15 +1,15 @@
 import tkinter as tk
-from tkinter import filedialog
-import os
 from . import Frame, Button, Dialog, TextField, Label
 
 class PropertyDialog(Dialog):
-  def __init__(self, master, title, inputLength, defaultWeightRange, rowSize, onSubmit=None, onResetDisplay=None):
+  def __init__(self, master, title, inputLength, defaultWeightRange, rowSize, referencePath, getFilePathDialog=None, onSubmit=None, onResetDisplay=None):
     self.width = 744
     self.height = 364
     self.master = master
     self.inputLength = inputLength
     self.weightRange = defaultWeightRange
+    self.referencePath = referencePath
+    self.getFilePathDialog = getFilePathDialog
     self.rowSize = rowSize
     self.onSubmit=onSubmit
     self.onResetDisplay=onResetDisplay
@@ -26,10 +26,10 @@ class PropertyDialog(Dialog):
     bodyFrame = Frame(master, width=self.width, height=self.height)
     bodyFrame.pack(fill=tk.BOTH, anchor=tk.CENTER, padx=32, pady=16, expand=True)
     
-    referenceFrame = Frame(master, width=624, height=48)
-    referenceFrame.pack(fill=tk.X, ipady=4, ipadx=16, pady=16, padx=48)
+    referenceFrame = Frame(bodyFrame, width=624, height=64)
+    referenceFrame.pack(fill=tk.X, pady=16, padx=48)
 
-    self.dataPathLabel = Label(referenceFrame, width=480, text=self.dataPath if self.dataPath else 'no data', side=tk.LEFT, expand=True)
+    self.dataPathLabel = Label(referenceFrame, width=480, text=self.referencePath, side=tk.LEFT, expand=True)
     self.dataPathButton = Button(referenceFrame, text='Browse', width=128, side=tk.RIGHT, command=self._selectDirectory)
 
     inputLayerSizeFrame = Frame(bodyFrame, width=self.width, height=64)
@@ -64,9 +64,9 @@ class PropertyDialog(Dialog):
     return colSize.is_integer()
 
   def _selectDirectory(self):
-    iDir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')
-    fpath = filedialog.askdirectory(title='reference Directory', initialdir=iDir)
+    fpath = self.getFilePathDialog(title='reference Directory', isDir=True)
     if fpath:
+      self.referencePath = fpath
       self.dataPathLabel.setText(fpath)
   
 
@@ -78,7 +78,7 @@ class PropertyDialog(Dialog):
     if self.rowSize == inputSize and self.weightRange == weightRange:
       return
 
-    self.onResetDisplay(*self.onSubmit(int(inputSize), float(weightRange)))
+    self.onResetDisplay(*self.onSubmit(self.referencePath, int(inputSize), float(weightRange)))
 
 class InputTextField(TextField):
   def __init__(self, master, onSubmit=False, **kwargs):

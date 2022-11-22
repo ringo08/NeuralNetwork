@@ -1,14 +1,13 @@
 import tkinter as tk
-from tkinter import filedialog
-import os
 from . import Button, Frame, ButtonBox, Entry, Dialog, Label
 
 class SelectLearningDataDialog(Dialog):
-  def __init__(self, master, title=None, defaultPath='', writeNetworkParam=None, onSelectLearningData=None):
+  def __init__(self, master, title=None, defaultPath='', getFilePathDialog=None, writeNetworkParam=None, onSelectLearningData=None):
     self.width = 752
     self.height = 380
     self.dataPath = defaultPath
     self.writeNetworkParam = writeNetworkParam
+    self.getFilePathDialog = getFilePathDialog
     self.onSelectLearningData = onSelectLearningData
     super().__init__(master, title=title, width=self.width, height=self.height)
  
@@ -41,16 +40,10 @@ class SelectLearningDataDialog(Dialog):
     self.actions = ButtonBox(master, width=self.width, height=64, children=self.footer, padx=48)
 
   def _selectLearningDataFile(self):
-    typ = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')] 
-    iDir = os.path.abspath(os.path.dirname(__file__))
-    fpath = filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
-    if fpath:
-      self.onChangeText(fpath)
-  
-  def onChangeText(self, text):
-    if text.strip():
-      self.dataPathLabel.setText(text)
-      self.dataPath = text
+    fpath = self.getFilePathDialog(title='select learning data')
+    if fpath.strip():
+      self.dataPathLabel.setText(fpath)
+      self.dataPath = fpath
 
   def apply(self):
     self.writeNetworkParam({

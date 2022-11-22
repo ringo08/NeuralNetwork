@@ -2,6 +2,7 @@ import os, shutil
 from ..NNApp import NNApp
 from . import Messages
 from multiprocessing import Process
+from config.settingConfig import configUpdate
 
 def is_num(s):
   try:
@@ -26,6 +27,7 @@ class Model:
     self.learningDataPath = ''
     self.testDataPath = ''
     self.basePath = self.config['Paths']['data']
+    self.referencePath = self.config['Paths']['reference']
     self.network = []
     self.dataPath = { key: self.config['Paths'][key] for key in self.config['Datas'] }
     self.messages = Messages.Messages(config)
@@ -209,6 +211,8 @@ class Model:
   # Start train network
   def onLearnNetwork(self, flag: bool, func=None):
     if self.readOperation() == self.config['Operate']['end']:
+      func(index=-1)
+      self.process.terminate()
       return
 
     self.writeOperation('start' if flag else 'stop')
@@ -231,7 +235,7 @@ class Model:
     fileIndex = -1 if isInit else fileIndex
     getIndex = fileIndex if fileIndex != None else -2
     flag = (operation == self.config['Operate']['start']) or isInit
-    if not (flag or fileIndex):
+    if not (flag or bool(fileIndex)):
       return
     lines = self._read_file(self.dataPath['parameter'])
     if lines is None:
@@ -241,7 +245,7 @@ class Model:
     header = lines[1]
     input_num, hidden_num, output_num = [int(line.strip()) for line in header.split(',')]
 
-    loss = [float(line.split(',')[0].strip()) for line in lines[4:] if line.split(',')[0].strip()]
+    loss = [float(line.split(',')[0].strip()) for line in lines[4:] if line.split(',')[0].strip() != '']
     flat_array = [float(line.strip()) if line != '' else None for line in lines[getIndex].split(',')]
     index = int(flat_array[1])
     flat_array = flat_array[2:]
@@ -254,7 +258,7 @@ class Model:
 
     inputData = datas[0][index] if datas else [0]*input_num
     targetData = datas[1][index] if datas else [0]*output_num
-    return (flag, loss, [inputData, hidden_out, output_out, targetData], weights)
+    return (isInit, loss, [inputData, hidden_out, output_out, targetData], weights)
 
   def getLearningData(self, fpath):
     if not os.path.isfile(fpath):
@@ -276,6 +280,8 @@ class Model:
   
   # Load setting data file
   def readSettingFile(self):
+    if not os.path.isfile(self.dataPath['setting']):
+      return {}
     contents = self._read_file(self.dataPath['setting'])
     array = ['error', 'epoch', 'updateFreqency', 'updateInterval']
     values = [float(column.strip()) for column in contents[-1].split(self.sep) if is_num(column.strip())]
@@ -341,10 +347,12 @@ class Model:
 
 # Property Dialog
   def propertySubmit(self, fpath, inputSize, colorRange):
-    self.referencePath = fpath
+    if fpath:
+      configUpdate(self.config, { 'Paths': { 'reference': fpath } }, self.config['Paths']['configfile'])
+      self.referencePath = fpath
     self.inputSize = inputSize
     self.colorRange = colorRange
-    return fpath, self.inputSize, self.colorRange
+    return self.inputSize, self.colorRange
   
   def getParam(self, layer, neuron, weight=None):
     weights, biases = self.readNetworkFile(-1)

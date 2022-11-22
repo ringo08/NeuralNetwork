@@ -1,14 +1,13 @@
 import tkinter as tk
-from tkinter import filedialog
-import os
 from . import Frame, Button, Dialog, Entry, Listbox, ButtonBox, Label
 
 class CreateLearningDataDialog(Dialog):
-  def __init__(self, master, title=None, onLoadFile=None, onMakeFile=None):
+  def __init__(self, master, title=None, getFilePathDialog=None, onLoadFile=None, onMakeFile=None):
     self.width = 976
     self.height = 428
     self.master = master
     self.selectIndex = None
+    self.getFilePathDialog=getFilePathDialog
     self.onLoadFile = onLoadFile
     self.onMakeFile = onMakeFile
     super().__init__(master, title=title, width=self.width, height=self.height)
@@ -59,7 +58,7 @@ class CreateLearningDataDialog(Dialog):
     self.actions.buttons['make learning data']['state'] = tk.DISABLED
 
   def loadLearningData(self):
-    fpath = self._selectLoadFile()
+    fpath = self.getFilePathDialog(title='load learning data file')
     if not fpath:
       return
     data = self.onLoadFile(fpath)
@@ -86,22 +85,10 @@ class CreateLearningDataDialog(Dialog):
       return
 
     data = { 'input': inputData, 'target': targetData }
-    fpath = self._selectSaveFile()
+    fpath = self.getFilePathDialog(title='save learning data file', isSave=True)
     if not fpath:
       return
     self.onMakeFile(fpath, data)
-
-  def _selectSaveFile(self):
-    typ = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')] 
-    iDir = os.path.abspath(os.path.dirname(__file__))
-    fpath = filedialog.asksaveasfilename(filetypes=typ, initialdir=iDir)
-    return fpath
-
-  def _selectLoadFile(self):
-    typ = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')] 
-    iDir = os.path.abspath(os.path.dirname(__file__))
-    fpath = filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
-    return fpath
   
   def setListItem(self):
     if self.selectIndex == None:

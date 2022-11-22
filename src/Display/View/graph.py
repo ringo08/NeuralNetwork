@@ -20,6 +20,7 @@ class Graph(Frame):
     self.ytickLabels = []
     self.xtickPoints = []
     self.xtickLabels = []
+    self.progress = None
     self._init_graph()
     self.graph_plot()
 
@@ -41,7 +42,7 @@ class Graph(Frame):
     self._init_graph()
     
   def setMinimum(self, minimum):
-    self.minimum = math.log10(minimum*0.01)
+    self.minimum = math.log10(minimum)
 
   def addData(self, x):
     self.data.append(x)
@@ -50,10 +51,11 @@ class Graph(Frame):
   def setData(self, datas):
     self.data = datas
     self.graph_plot()
-
+  
   def graph_plot(self):
     w, h = self.canvasSize
-    yRange = (abs(self.minimum) + abs(self.maximum))
+    minimum = self.minimum - 2
+    yRange = (abs(minimum) + abs(self.maximum))
     self.maxPoint = len(self.data)
   
     if self.maxPoint < 1:
@@ -63,7 +65,7 @@ class Graph(Frame):
       xtick = { n: (w/self.maxPoint)*n for n in range(1, self.maxPoint+1, xtickPoint) }
     else:
       xtick = { n: (w/self.maxPoint)*n for n in range(1, self.maxPoint) }
-    ytick = { l: (h*n)/yRange for l, n in zip(range(int(self.maximum), int(self.minimum-1), -1), range(int(yRange+1))) }
+    ytick = { l: (h*n)/yRange for l, n in zip(range(int(self.maximum), int(minimum-1), -1), range(int(yRange+1))) }
     self.tick_plot(xtick, ytick)
     
     if self.maxPoint < 2:
@@ -72,7 +74,7 @@ class Graph(Frame):
     for n in range(self.maxPoint):
       x = (w * n) / self.maxPoint
       coords.append(x)
-      coords.append(h*(math.log10(self.data[n])/(self.maximum+self.minimum)))
+      coords.append(h*(math.log10(self.data[n])/(-1*yRange)))
 
     self.graphCanvas.coords('line', *coords)
     self.graphCanvas.update()

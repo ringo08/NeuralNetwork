@@ -30,6 +30,7 @@ def main():
   config = ConfigParser(interpolation=ExtendedInterpolation())
   path_root = os.path.dirname(os.path.abspath(__file__))
   path_config = os.path.join(path_root, 'config', 'config.ini')
+
   if not os.path.isfile(path_config):
     configWrite(path_config)
   configUpdate(config, { 'Paths': {'root': path_root }}, path_config)

@@ -59,7 +59,7 @@ class Controller:
     self.openNetworkDialog(result)
 
   def saveNetwork(self):
-    fpath = filedialog.asksaveasfilename(title='Save As')
+    fpath = self.getFilePathDialog(title='Save As', isDir=True, isSave=True)
     self.model.saveNetwork(fpath)
 
   def quit(self):
@@ -71,10 +71,13 @@ class Controller:
     if self.networkDialog:
       self.networkDialog.destroy()
     self.networkDialog = tk.Toplevel(self.master)
+    
+    setting = self.model.readSettingFile()
     self.NetworkDialog = NetworkDialog(
       master=self.networkDialog,
       title='network',
       onUpdate=self.model.onUpdateNetworkParam,
+      minimum=setting.get('error'),
       onClick=self.openParamDialog,
       defaultLayer=defaultLayer
     )
@@ -98,6 +101,7 @@ class Controller:
   def openNetworkSettingDialog(self):
     dialog = NetworkSettingDialog(
       master=self.master,
+      getFilePathDialog=self.getFilePathDialog,
       title='create network'
     )
     return dialog
@@ -110,6 +114,7 @@ class Controller:
     return SelectLearningDataDialog(
       master=master,
       title='learning prop',
+      getFilePathDialog=self.getFilePathDialog,
       defaultPath=self.model.learningDataPath,
       onSelectLearningData=self.onSelectLearningData,
       writeNetworkParam=self.model.writeNetworkParam
@@ -119,6 +124,7 @@ class Controller:
     return CreateLearningDataDialog(
       master=self.master,
       title='Learning Data',
+      getFilePathDialog=self.getFilePathDialog,
       onLoadFile=self.model.readLearningDataFile,
       onMakeFile=self.model.makeLearningDataFile
     )
@@ -147,6 +153,7 @@ class Controller:
       defaultPath=self.model.testDataPath,
       onLoadData=self.model.readLearningData,
       onStartTest=self.model.startTest,
+      getFilePathDialog=self.getFilePathDialog,
       onPutFile=self.model.onPutFile,
       onChangeTestIndex=lambda index: self.NetworkDialog.onUpdateDisplay(lambda: self.model.getTestAnswerByIndex(index)),
       title='Test'
@@ -158,10 +165,22 @@ class Controller:
       inputLength=self.model.layerNums[0],
       rowSize=self.model.inputSize,
       defaultWeightRange=self.model.colorRange,
+      getFilePathDialog=self.getFilePathDialog,
       onSubmit=self.model.propertySubmit,
+      referencePath=self.model.referencePath,
       onResetDisplay=self.NetworkDialog.onResetDisplay,
       title='Property'
     )
+  
+  def getFilePathDialog(self, title, isDir=False, isSave=False):
+    types = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')]
+    if isSave:
+      return filedialog.asksaveasfilename(title='Save As', initialdir=self.model.referencePath, filetypes='' if isDir else types)
+    if isDir:
+      return filedialog.askdirectory(title=title, initialdir=self.model.referencePath)
+
+    return filedialog.askopenfilename(filetypes=types, initialdir=self.model.referencePath)
+
   # def openAlertDialog(self):
   #   return AlertDialog(
   #     master=self.master,

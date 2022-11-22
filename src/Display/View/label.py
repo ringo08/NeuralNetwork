@@ -10,6 +10,8 @@ defaultProps = {
   'anchor': tk.CENTER,
   'side': tk.TOP,
   'fontColor': 'black',
+  'iside': tk.TOP,
+  'ianchor': tk.CENTER,
   'fill': tk.BOTH,
   'fontSize': 14,
   'expand': False
@@ -25,9 +27,9 @@ class Label(tk.Label):
     fontSize = props['fontSize']
     frameProps = ['padx', 'pady', 'anchor', 'side', 'fill', 'expand']
     frame.pack(**{ key: props[key] for key in frameProps })
-    super().__init__(frame, text=text, font=('', fontSize), fg=props['fontColor'], wraplength=width)
+    super().__init__(frame, text=text, anchor=props['ianchor'], font=('', fontSize), fg=props['fontColor'], wraplength=width)
     self.config(bg=props['color'])
-    self.pack(fill=tk.BOTH, padx=props['ipadx'], pady=props['ipady'], expand=True)
+    self.pack(fill=tk.BOTH, side=props['iside'], padx=props['ipadx'], pady=props['ipady'], expand=True)
 
 
   def setText(self, string):

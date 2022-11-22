@@ -22,7 +22,7 @@ def configWrite(path_config=''):
     'config':  os.path.join('${root}', 'config'),
     'configfile':  os.path.join('${config}', 'config.ini'),
     'operation':  os.path.join('${config}', 'OPERATIONFILE'),
-    'reference':  '',
+    'reference':  os.path.expanduser('~'),
   }
 
   for data in datas:
