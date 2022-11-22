@@ -8,6 +8,7 @@ from .label import Label as Label
 from .textField import TextField as TextField
 from .buttonBox import ButtonBox as ButtonBox
 from .listbox import Listbox as Listbox
+from .comboBox import ComboBox as ComboBox
 from .colorBar import ColorBar as ColorBar
 from .graph import Graph as Graph
 from .mainMenu import MainMenu as MainMenu
@@ -31,6 +32,7 @@ __all__ = [
   'TextField'
   'Listbox'
   'ButtonBox',
+  'ComboBox',
   'ColorBar',
   'Graph',
   'MainMenu',

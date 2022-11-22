@@ -1,5 +1,5 @@
 import tkinter as tk
-from . import Frame, Button, Dialog, TextField, Label
+from . import Frame, Button, Dialog, TextField, Label, ComboBox
 
 class PropertyDialog(Dialog):
   def __init__(self, master, title, inputLength, defaultWeightRange, rowSize, referencePath, getFilePathDialog=None, onSubmit=None, onResetDisplay=None):
@@ -42,8 +42,9 @@ class PropertyDialog(Dialog):
     self.weightRangeField = WeightTextField(weightRangeFrame, defaultValue=self.weightRange, text='weight range', side=tk.LEFT, expand=True, padx=8)
     self.weightButton = Button(weightRangeFrame, width=176, height=64, text='fix to maximum absolute', side=tk.RIGHT, anchor=tk.CENTER, pady=16, padx=8)
 
-    colorScaleFrame = Frame(bodyFrame, width=self.width, height=64)
-    colorScaleFrame.pack(fill=tk.BOTH, side=tk.TOP, padx=32, pady=8)
+    boxFrame = Frame(bodyFrame, width=self.width, height=128)
+    self.language = ComboBox(boxFrame, width=self.width//2, height=32, items=['ja', 'en'], defaultValue='ja', ianchor=tk.E, iexpand=False, iside=tk.RIGHT, state='readonly')
+    boxFrame.pack(fill=tk.BOTH, side=tk.TOP, padx=32, pady=8)
     self.init = False
     self.setLabel(self.rowSize)
 
