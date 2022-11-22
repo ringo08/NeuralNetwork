@@ -1,14 +1,15 @@
 import tkinter as tk
-import os
 from . import Frame, Button, Dialog, TextField, Label
 
 class PropertyDialog(Dialog):
-  def __init__(self, master, title, inputLength, defaultWeightRange, rowSize, onSubmit=None, onResetDisplay=None):
+  def __init__(self, master, title, inputLength, defaultWeightRange, rowSize, referencePath, getFilePathDialog=None, onSubmit=None, onResetDisplay=None):
     self.width = 744
     self.height = 364
     self.master = master
     self.inputLength = inputLength
     self.weightRange = defaultWeightRange
+    self.referencePath = referencePath
+    self.getFilePathDialog = getFilePathDialog
     self.rowSize = rowSize
     self.onSubmit=onSubmit
     self.onResetDisplay=onResetDisplay
@@ -24,6 +25,12 @@ class PropertyDialog(Dialog):
   def _body(self, master):
     bodyFrame = Frame(master, width=self.width, height=self.height)
     bodyFrame.pack(fill=tk.BOTH, anchor=tk.CENTER, padx=32, pady=16, expand=True)
+    
+    referenceFrame = Frame(bodyFrame, width=624, height=64)
+    referenceFrame.pack(fill=tk.X, pady=16, padx=48)
+
+    self.dataPathLabel = Label(referenceFrame, width=480, text=self.referencePath, side=tk.LEFT, expand=True)
+    self.dataPathButton = Button(referenceFrame, text='Browse', width=128, side=tk.RIGHT, command=self._selectDirectory)
 
     inputLayerSizeFrame = Frame(bodyFrame, width=self.width, height=64)
     inputLayerSizeFrame.pack(fill=tk.BOTH, side=tk.TOP, padx=32)
@@ -56,6 +63,13 @@ class PropertyDialog(Dialog):
     colSize = float(self.inputLength/float(inputSize))
     return colSize.is_integer()
 
+  def _selectDirectory(self):
+    fpath = self.getFilePathDialog(title='reference Directory', isDir=True)
+    if fpath:
+      self.referencePath = fpath
+      self.dataPathLabel.setText(fpath)
+  
+
   def apply(self):
     inputSize = self.inputSizeField.get()
     weightRange = self.weightRangeField.get()
@@ -64,7 +78,7 @@ class PropertyDialog(Dialog):
     if self.rowSize == inputSize and self.weightRange == weightRange:
       return
 
-    self.onResetDisplay(*self.onSubmit(int(inputSize), float(weightRange)))
+    self.onResetDisplay(*self.onSubmit(self.referencePath, int(inputSize), float(weightRange)))
 
 class InputTextField(TextField):
   def __init__(self, master, onSubmit=False, **kwargs):

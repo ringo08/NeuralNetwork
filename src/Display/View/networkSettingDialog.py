@@ -1,13 +1,12 @@
 import tkinter as tk
-from tkinter import filedialog
-import os
 from . import ButtonBox, Dialog, Frame, Button, Label, Entry
 
 class NetworkSettingDialog(Dialog):
-  def __init__(self, master, title=None, onSubmit=None, onCancel=None):
+  def __init__(self, master, title=None, getFilePathDialog=None, onSubmit=None, onCancel=None):
     self.width = 752
     self.height = 320
     self.pathLabel = ''
+    self.getFilePathDialog=getFilePathDialog
     self.onSubmit = onSubmit if onSubmit else self.ok
     self.onCancel = onCancel if onCancel else self.cancel
     super().__init__(master, title=title, width=self.width, height=self.height)
@@ -41,8 +40,7 @@ class NetworkSettingDialog(Dialog):
     self.actions = ButtonBox(master=master, width=self.width, children=self.footer)
 
   def selectNetwork(self):
-    iDir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..')
-    fpath = filedialog.askdirectory(title='Load Network Directory', initialdir=iDir)
+    fpath = self.getFilePathDialog(title='Load Network Directory', isDir=True)
     return fpath
 
   def setLabel(self, string=''):
@@ -53,7 +51,7 @@ class NetworkSettingDialog(Dialog):
       self.outputEntry['state'] = tk.DISABLED
       self.pathLabel = string
     else:
-      self.label.setText('')
+      self.label.setText('no file path')
       self.pathLabel = ''
       self.inputEntry['state'] = tk.NORMAL
       self.hiddenEntry['state'] = tk.NORMAL

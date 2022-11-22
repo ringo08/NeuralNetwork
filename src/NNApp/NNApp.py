@@ -67,7 +67,7 @@ class NNApp:
   def _is_read_operation_file(self, key='stop'):
     with open(self.config['Paths']['operation'], 'rt', encoding='utf-8') as f:
       lines = f.readline()
-    return self.config['Operate'][key] == lines.strip() 
+    return self.config['Operate'][key] == lines.strip()
 
   def _write_end_operation_file(self, key='end'):
     if not key in ['stop', 'end']:
@@ -80,14 +80,14 @@ class NNApp:
       print(string, file=f)
 
   def createHeader(self, input_num=2, hidden_num=2, output_num=1):
-    fpaths = [self.data_path[key] for key in ['construction', 'output']]
+    fpaths = [self.data_path[key] for key in ['construction', 'parameter']]
     for fpath in fpaths:
       self._output_file(fpath, "input_num, hidden_num, output_num", write_type='wt')
       self._output_file(fpath, f"{input_num}, {hidden_num}, {output_num}")
       self._output_file(fpath, f"{self._print_bw('h', input_num, hidden_num)}, {self._print_bw('o', hidden_num, output_num)}")  
 
   def createParamHeader(self, input_num=2, hidden_num=2, output_num=1):
-    fpath = self.data_path['param']
+    fpath = self.data_path['output']
     self._output_file(fpath, "input_num, hidden_num, output_num", write_type='wt')
     self._output_file(fpath, f"{input_num}, {hidden_num}, {output_num}")
     numdict = { 'input_num': input_num, 'hidden_num': hidden_num, 'output_num': output_num }
@@ -112,11 +112,11 @@ class NNApp:
       and 0 <= w_index < len(self.network.layers[layer_index].neurons[neuron_index].weight)
     ):
       return
-    self.createNetwork(readFile=self.data_path['output'], out=True)
+    self.createNetwork(readFile=self.data_path['parameter'], out=True)
     self.network.layers[layer_index].neurons[neuron_index].cut(w_index)
     self.output_network(self.data_path['construction'])
-    self.output_network(self.data_path['output'])
-    self.output_param(self.data_path['param'], index=0)
+    self.output_network(self.data_path['parameter'])
+    self.output_layer_out(self.data_path['output'], index=0)
     return True
 
   def createNetwork(self, readFile=None, out=False):
@@ -128,8 +128,8 @@ class NNApp:
     
     if out:
       self.output_network(fpath)
-      self.output_network(self.data_path['output'])
-      self.output_param(self.data_path['param'], index=0)
+      self.output_network(self.data_path['parameter'])
+      self.output_layer_out(self.data_path['output'], index=0)
     return (self.input_num, self.hidden_num, self.output_num)
 
   def output_network(self, outFile, sep=','):
@@ -145,7 +145,7 @@ class NNApp:
     with open(outFile, 'at', encoding='utf-8') as f:
       print(string, file=f)
 
-  def output_param(self, outFile, index=0, score=None, sep=','):
+  def output_layer_out(self, outFile, index=0, score=None, sep=','):
     if not self.network:
       return
     string = '{:.3e}'.format(score) if score != None else ''
@@ -177,17 +177,16 @@ class NNApp:
     while True:
       if self._is_read_operation_file('stop'):
         stoped = True
-      if not self._is_read_operation_file('start'):
-        if score and self._is_read_operation_file('init'):
-          self.initWeight()
-          count = 0
-          e = 0
-          answer = []
-          score = []
         continue
+      if score and self._is_read_operation_file('init'):
+        self.initWeight()
+        count = 0
+        e = 0
+        answer = []
+        score = []
       elif stoped:
         stoped = False
-        self.createNetwork(readFile=self.data_path['output'])
+        self.createNetwork(readFile=self.data_path['parameter'])
       count += 1
       score = self.network.learning(
         self.learning_data,
@@ -198,15 +197,14 @@ class NNApp:
       if count%self.freq==0:
         self.score = mean(score)
         answer.append(self.score)
-        e += 1
-        # print(f'epoch: {e:3}, loss: {answer[-1], score}')
-        self.network.fit(self.learning_data[e%len(self.target_data)])
-        self.output_network(self.data_path['output'])
-        self.output_param(self.data_path['param'], index=e%len(self.target_data), score=self.score)
+        index = e%len(self.target_data)
+        self.network.fit(self.learning_data[index])
+        self.output_network(self.data_path['parameter'])
+        self.output_layer_out(self.data_path['output'], index=index, score=self.score)
         if e >= self.epoch:
           self._write_end_operation_file('stop')
           e = 0
-          stoped = True
+        e += 1
         if answer[-1] < self.error:
           self._write_end_operation_file('end')
           break
@@ -235,13 +233,15 @@ def main(config):
   nnapp.train_network(n=0.99)
 
 if __name__ == '__main__':
-  from config.settingConfig import update
+  from config.settingConfig import configUpdate, configWrite
   from configparser import ConfigParser, ExtendedInterpolation
   config = ConfigParser(interpolation=ExtendedInterpolation())
   path_root = os.getcwd()
 
-  path_config = os.path.join(path_root, 'config/config.ini')
+  path_config = os.path.join(path_root, 'config', 'config.ini')
+  if not os.path.isfile(path_config):
+    configWrite(path_config)
 
-  update(config, { 'Paths': {'root': path_root }}, path_config)
+  configUpdate(config, { 'Paths': {'root': path_root }}, path_config)
   config.read(path_config)
   main(config)

@@ -3,6 +3,7 @@ __pycache__/
 rename/
 data/
 cut/
+sample/
 
 config/*
 !settingConfig.py

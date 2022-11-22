@@ -1,7 +1,7 @@
 import tkinter as tk
 import os
 from src.Display import Controller, Model, Messages
-from config.settingConfig import update
+from config.settingConfig import configWrite, configUpdate
 from configparser import ConfigParser, ExtendedInterpolation
 
 class Application(tk.Frame):
@@ -28,10 +28,12 @@ class Application(tk.Frame):
 
 def main():
   config = ConfigParser(interpolation=ExtendedInterpolation())
-  path_root = os.getcwd()
-  path_config = os.path.join(path_root, 'config/config.ini')
+  path_root = os.path.dirname(os.path.abspath(__file__))
+  path_config = os.path.join(path_root, 'config', 'config.ini')
 
-  update(config, { 'Paths': {'root': path_root }}, path_config)
+  if not os.path.isfile(path_config):
+    configWrite(path_config)
+  configUpdate(config, { 'Paths': {'root': path_root }}, path_config)
   config.read(path_config)
 
   root = tk.Tk()

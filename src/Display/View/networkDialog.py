@@ -1,15 +1,17 @@
 import tkinter as tk
-from . import Frame, DialogFrame, ColorBar, Graph
+from . import Frame, DialogFrame, ColorBar, Graph, Label
 
 class NetworkDialog(DialogFrame):
-  def __init__(self, master, title=None, onUpdate=None, onClick=None, defaultLayer=[2, 2, 3]):
+  def __init__(self, master, title=None, onUpdate=None, onClick=None, minimum=None, defaultLayer=[2, 2, 3]):
     self.width = 1120
     self.height = 800
-    self.pad = 24
+    self.pad = 8
     self.layers = defaultLayer
     self.onClick = onClick
     self.onUpdate = onUpdate
     super().__init__(master, title=title, width=self.width, height=self.height)
+    if minimum:
+      self.setMinimumError(minimum)
     self.onUpdateDisplay()
 
   def init_body(self, master):
@@ -22,7 +24,11 @@ class NetworkDialog(DialogFrame):
     leftFrame = Frame(master, width=self.width//2, height=self.height)
     leftFrame.pack(fill=tk.BOTH, side=tk.LEFT, expand=True, pady=self.pad)
     
-    networkFrame = Network(leftFrame, width=self.width//2, height=self.height//3*2-self.pad*2, layers=self.layers, onClick=self.onClick)
+    progressHeight = 16
+    networkFrame = Network(leftFrame, width=self.width//2, height=self.height//3*2-self.pad*2-progressHeight, layers=self.layers, onClick=self.onClick)
+    # graphHeight = height=self.height//3-self.pad
+    # graphFrame = Frame(leftFrame, width=self.width//2, height=graphHeight+progressHeight)
+    self.progress = Label(leftFrame, text='No Info', fontSize=12, width=self.width//2, height=16, ianchor=tk.SE)
     self.graph = Graph(leftFrame, width=self.width//2, height=self.height//3-self.pad)
     
     rightFrame = Frame(master, width=self.width//2, height=self.height)
@@ -32,20 +38,28 @@ class NetworkDialog(DialogFrame):
     self.connection = DisplayConnection(rightFrame, width=self.width//2-colorbarWidth, height=self.height, layers=self.layers)
     colorscaleFrame = ColorBar(rightFrame, width=colorbarWidth)
 
+  def setMinimumError(self, minimum):
+    self.graph.setMinimum(minimum)
+    data = self.graph.data
+    if data:
+      self.updateProgress(len(data), data[-1])
+  
+  def updateProgress(self, length, last):
+    text = 'epoch: {}, {:.3e} / {:.3e}'.format(1+length, last, 10**(self.graph.minimum))
+    self.progress.setText(text)
+
   def onResetDisplay(self, inputSize=None, weightRange=None):
     self.connection.replot(inputSize, weightRange)
-    self.onUpdateDisplay(lambda: self.onUpdate(-1))
+    self.onUpdateDisplay(index=-1)
 
-  def onUpdateDisplay(self, func=None):
-    items = func() if bool(func) else self.onUpdate()
+  def onUpdateDisplay(self, func=None, index=None):
+    items = func() if bool(func) else self.onUpdate(index)
     if items == None:
       return
     flag, loss, layerOuts, weights = items
-    if not flag:
-      self.graph.clear()
-      return
     if loss:
       self.graph.setData(loss)
+      self.updateProgress(len(loss), loss[-1])
     self.connection.update_boxes(layerOuts, weights)
 
   def _init_footer(self, master):
@@ -117,7 +131,6 @@ class DisplayConnection(Frame):
     self.height = height
     self.layers = layers
     self.networkWidth = self.width-16
-    self.networkPady = 8
     self.networkHeight = self.height/((len(self.layers)+1)*2)
     super().__init__(master, width, height)
     self.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)

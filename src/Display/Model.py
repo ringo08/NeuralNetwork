@@ -2,7 +2,7 @@ import os, shutil
 from ..NNApp import NNApp
 from . import Messages
 from multiprocessing import Process
-from config.settingConfig import update
+from config.settingConfig import configUpdate
 
 def is_num(s):
   try:
@@ -27,6 +27,7 @@ class Model:
     self.learningDataPath = ''
     self.testDataPath = ''
     self.basePath = self.config['Paths']['data']
+    self.referencePath = self.config['Paths']['reference']
     self.network = []
     self.dataPath = { key: self.config['Paths'][key] for key in self.config['Datas'] }
     self.messages = Messages.Messages(config)
@@ -87,7 +88,7 @@ class Model:
         self.onError(e)
 
   def readNetworkFile(self, fileIndex=None, isInit=False):
-    fpath = self.dataPath['construction'] if isInit else self.dataPath['output']
+    fpath = self.dataPath['construction'] if isInit else self.dataPath['parameter']
     getIndex = fileIndex if fileIndex != None else -2
     with open(fpath, 'rt', encoding='utf-8') as file:
       lines = file.readlines()
@@ -128,6 +129,7 @@ class Model:
   def createNetwork(self, out=False):
     if self.process:
       self.process.terminate()
+      self.process = None
     self.writeOperation('init')
     self.network = self.NNApp.createNetwork(out=out)
     self.isSaved = False
@@ -206,14 +208,11 @@ class Model:
     self._output_file(fpath, ','.join(columns), write_type=wtype)
     self._output_file(fpath, ','.join([data[column] for column in columns]))
 
-  # Start train network
-  def onLearnNetwork(self, flag: bool, func=None):
+  def onChangeTrainOperation(self, flag):
     if self.readOperation() == self.config['Operate']['end']:
-      return
-
+      return False
     self.writeOperation('start' if flag else 'stop')
-    func()
-    if not self.process:
+    if flag and not self.process:
       if not (os.path.isfile(self.dataPath['learning'])):
         self.onError('learning data file was not found')
         return
@@ -222,6 +221,14 @@ class Model:
         return
       self.process = Process(target=initNNApp, args=(self.NNApp, ))
       self.process.start()
+
+  # Start train network
+  def onLearnNetwork(self, func=None):
+    if self.readOperation() == self.config['Operate']['end']:
+      func(index=-1)
+      self.process.terminate()
+      return False
+    func()
     return self.readOperation() == self.config['Operate']['start']
   
   def onUpdateNetworkParam(self, fileIndex=None):
@@ -231,9 +238,9 @@ class Model:
     fileIndex = -1 if isInit else fileIndex
     getIndex = fileIndex if fileIndex != None else -2
     flag = (operation == self.config['Operate']['start']) or isInit
-    if not (flag or fileIndex):
+    if not (flag or bool(fileIndex)):
       return
-    lines = self._read_file(self.dataPath['param'])
+    lines = self._read_file(self.dataPath['output'])
     if lines is None:
       return
     if len(lines)-3 < abs(getIndex):
@@ -241,7 +248,7 @@ class Model:
     header = lines[1]
     input_num, hidden_num, output_num = [int(line.strip()) for line in header.split(',')]
 
-    loss = [float(line.split(',')[0].strip()) for line in lines[4:] if line.split(',')[0].strip()]
+    loss = [float(line.split(',')[0].strip()) for line in lines[4:] if line.split(',')[0].strip() != '']
     flat_array = [float(line.strip()) if line != '' else None for line in lines[getIndex].split(',')]
     index = int(flat_array[1])
     flat_array = flat_array[2:]
@@ -254,28 +261,32 @@ class Model:
 
     inputData = datas[0][index] if datas else [0]*input_num
     targetData = datas[1][index] if datas else [0]*output_num
-    return (flag, loss, [inputData, hidden_out, output_out, targetData], weights)
+    return (isInit, loss, [inputData, hidden_out, output_out, targetData], weights)
 
-  def getLearningData(self, fpath):
+  def validateLearingData(self, fpath):
     if not os.path.isfile(fpath):
-      return
+      return False
     datas = self._read_file(fpath)
     data = [int(d.strip()) for d in datas[1].split(',')]
     validateInOut = [self.network[0], self.network[-1]]
     if validateInOut != data:
       self.onError('not equal from network input or output to learning data')
+      return False
+    return True
 
   # Select learning data for train
   def onSelectLearningDataForTrain(self, fpath):
-    self.getLearningData(fpath)
+    if not fpath:
+      return False
     if os.path.isfile(self.dataPath['learning']):
       os.remove(self.dataPath['learning'])
     shutil.copyfile(fpath, self.dataPath['learning'])
     self.learningDataPath = fpath
-    return fpath
   
   # Load setting data file
   def readSettingFile(self):
+    if not os.path.isfile(self.dataPath['setting']):
+      return {}
     contents = self._read_file(self.dataPath['setting'])
     array = ['error', 'epoch', 'updateFreqency', 'updateInterval']
     values = [float(column.strip()) for column in contents[-1].split(self.sep) if is_num(column.strip())]
@@ -295,12 +306,12 @@ class Model:
 # Test Dialog Functions
   def readLearningData(self, fpath):
     self.testDataPath = fpath
-    self.getLearningData(fpath)
+    self.validateLearingData(fpath)
     self.testMaxIndex = self.NNApp.setTestData(fpath)
 
   def startTest(self):
     self.testAnswers = []
-    self.NNApp.createNetwork(readFile=self.dataPath['output'], out=False)
+    self.NNApp.createNetwork(readFile=self.dataPath['parameter'], out=False)
     for i in range(self.testMaxIndex):
       self.testAnswers.append(self.NNApp.test(i))
     return len(self.testAnswers)
@@ -340,7 +351,10 @@ class Model:
     return [line.strip().upper() for line in lines][0]
 
 # Property Dialog
-  def propertySubmit(self, inputSize, colorRange):
+  def propertySubmit(self, fpath, inputSize, colorRange):
+    if fpath:
+      configUpdate(self.config, { 'Paths': { 'reference': fpath } }, self.config['Paths']['configfile'])
+      self.referencePath = fpath
     self.inputSize = inputSize
     self.colorRange = colorRange
     return self.inputSize, self.colorRange

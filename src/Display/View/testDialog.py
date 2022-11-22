@@ -1,16 +1,15 @@
 import tkinter as tk
-from tkinter import filedialog
-import os
 from . import Button, Frame, DialogFrame, Label
 
 class TestDialog(DialogFrame):
-  def __init__(self, master, title, defaultPath, onLoadData=None, onStartTest=None, onChangeTestIndex=None, onPutFile=None):
+  def __init__(self, master, title, defaultPath, onLoadData=None, onStartTest=None, getFilePathDialog=None, onChangeTestIndex=None, onPutFile=None):
     self.width = 376
     self.height = 440
     self.testIndex = 0
     self.maxIndex = 0
     self.testDataPath = defaultPath
     self.onLoadData = onLoadData
+    self.getFilePathDialog = getFilePathDialog
     self.onChangeTestIndex = onChangeTestIndex
     self.onStartTest = onStartTest
     self.onPutFile = onPutFile
@@ -45,7 +44,7 @@ class TestDialog(DialogFrame):
 
     defaultText = self.testDataPath if self.testDataPath else 'no file path'
     self.fileLabel = Label(initButtonsFrame, text=defaultText, width=276, side=tk.TOP, expand=True)
-    self.loadData = Button(initButtonsFrame, text='load data', side=tk.TOP, command=lambda: self.fileLabel.setText(self._selectLearningDataFile()))
+    self.loadData = Button(initButtonsFrame, text='load data', side=tk.TOP, command=self.changeTestFile)
     self.startTest = Button(initButtonsFrame, text='start', height=64, side=tk.LEFT, expand=True, command=self.onStart)
     self.closeTest = Button(initButtonsFrame, text='close', height=64, side=tk.LEFT, expand=True, command=self.master.destroy)
 
@@ -61,21 +60,18 @@ class TestDialog(DialogFrame):
     buttons.pack(fill=tk.BOTH, anchor=tk.CENTER, side=tk.TOP)
   
     self.showAllButton = Button(dataFrame, text='show all', side=tk.TOP)
-    self.putFileButton = Button(dataFrame, text='put file', side=tk.TOP, command=lambda: self.onPutFile(self._selectPutFile()))
+    self.putFileButton = Button(dataFrame, text='put file', side=tk.TOP, command=self._selectPutFile)
   
   def _init_footer(self, master):
     pass
-  
-  def _selectLearningDataFile(self):
-    typ = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')] 
-    iDir = os.path.abspath(os.path.dirname(__file__))
-    fpath = filedialog.askopenfilename(filetypes=typ, initialdir=iDir)
-    return fpath
+
+  def changeTestFile(self):
+    fpath = self.getFilePathDialog(title='load data for test')
+    if fpath:
+      self.fileLabel.setText(fpath)
 
   def _selectPutFile(self):
-    fpath = filedialog.asksaveasfilename(title='Save As')
-    if fpath != '':
-      return fpath
+    self.onPutFile(self.getFilePathDialog(title='Save As', isSave=True))
     
 
 
