@@ -4,6 +4,9 @@ rename/
 data/
 cut/
 sample/
+build/
 
 config/*
+!src/
 !settingConfig.py
+!app.py

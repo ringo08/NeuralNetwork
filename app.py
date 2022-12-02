@@ -40,5 +40,5 @@ def main():
   myapp = Application(root, config)
   myapp.mainloop()
 
-if __name__ == '__main__':
+if '__main__' in __name__:
   main()
