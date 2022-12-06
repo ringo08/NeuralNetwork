@@ -10,3 +10,4 @@ config/*
 !src/
 !settingConfig.py
 !app.py
+*.so
