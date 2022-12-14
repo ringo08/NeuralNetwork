@@ -1,6 +1,7 @@
-import sys, os, gc
+import os, gc, sys
 sys.path.append('.')
-from .NeuralNetwork import Network
+from src.CythonNeuralNetwork import NeuralNetwork
+from src.CythonNeuralNetwork.NeuralNetwork import Network, Neuron, Layer
 
 def is_num(s):
   try:
@@ -227,10 +228,9 @@ class NNApp:
     return (outs, weights, [self.test_input_data[test_index], self.test_target_data[test_index]])
 
 # main
-def main(config):
-  nnapp = NNApp(config)
-  nnapp.train_setting()
-  nnapp.train_network(n=0.99)
+def main(app):
+  app.train_setting()
+  app.train_network(n=0.99)
 
 if __name__ == '__main__':
   from config.settingConfig import configUpdate, configWrite
@@ -244,4 +244,5 @@ if __name__ == '__main__':
 
   configUpdate(config, { 'Paths': {'root': path_root }}, path_config)
   config.read(path_config)
-  main(config)
+  nnapp = NNApp(config)
+  main(nnapp)

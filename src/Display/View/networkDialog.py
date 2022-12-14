@@ -183,7 +183,7 @@ class DisplayConnection(Frame):
       for column in range(columns):
         self.canvas[-1].create_box((width*column, height*row, width*(column+1), height*(row+1)), f'boxes-layer:{index+1 if target else index}-neuron:{column+row*columns}')
 
-  def create_weight_box(self, indexes: tuple[float, float], rows=1):
+  def create_weight_box(self, indexes, rows=1):
     front, next = tuple(indexes)
     frontLayer = self.layers[front]
     columns = frontLayer//rows
@@ -227,7 +227,7 @@ class Canvas(Frame):
     ids = self.canvas.find_all()
     return [self.canvas.gettags(_id)[0] for _id in ids]
 
-  def create_box(self, box: tuple[float, float, float, float], tagName: str):
+  def create_box(self, box, tagName: str):
     self.canvas.create_rectangle(*box, tag=tagName, fill='black', outline='white', width=0.1)
 
   def click(self, event):

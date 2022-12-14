@@ -5,9 +5,9 @@ data/
 cut/
 sample/
 build/
+.venv/
 
 config/*
 !src/
 !settingConfig.py
 !app.py
-*.so

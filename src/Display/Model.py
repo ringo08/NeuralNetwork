@@ -1,7 +1,8 @@
 import os, shutil
-from ..NNApp import NNApp
+from src.NeuralNetworkApp.NNApp import NNApp, main
 from . import Messages
 from multiprocessing import Process
+import subprocess as sp
 from config.settingConfig import configUpdate
 
 def is_num(s):
@@ -219,8 +220,13 @@ class Model:
       if not self.NNApp.network:
         self.onError('create Neural Network before train')
         return
-      self.process = Process(target=initNNApp, args=(self.NNApp, ))
+
+      self.process = Process(target=main, args=(self.NNApp, ))
       self.process.start()
+      # print(self.process.__builtins__)
+
+      # exec('python ./src/NeuralNetworkApp/NNApp.py &')
+      # self.process = True
 
   # Start train network
   def onLearnNetwork(self, func=None):
@@ -369,7 +375,3 @@ class Model:
     if self.NNApp.cut_combining(layer, neuron, weight):
       onCut()
       return self.onUpdateNetworkParam(-1)
-  
-def initNNApp(app):
-  app.train_setting()
-  app.train_network()
