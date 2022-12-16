@@ -71,7 +71,6 @@ class Controller:
       title='Review'
     )
 
-
   def saveNetwork(self):
     fpath = self.getFilePathDialog(title='Save As', isDir=True, isSave=True)
     self.model.saveNetwork(fpath)
@@ -79,7 +78,8 @@ class Controller:
   def quit(self):
     if not self.model.isSaved:
       if tk.messagebox.askyesno('config', 'quit before save?'):
-        self.master.destroy()
+        return
+    self.master.destroy()
 
   def openNetworkDialog(self, defaultLayer=[2, 2, 1]):
     if self.networkDialog:
