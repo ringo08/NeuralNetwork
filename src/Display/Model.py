@@ -200,7 +200,7 @@ class Model:
 # Train Setting Dialog Function
   # Set training params
   def writeNetworkParam(self, data):
-    columns = ['error', 'epoch', 'freq', 'interval']
+    columns = ['error', 'epochs', 'output', 'interval']
     fpath = self.dataPath['setting']
     if columns != list(data.keys()):
       return

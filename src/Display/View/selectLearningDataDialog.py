@@ -2,10 +2,10 @@ import tkinter as tk
 from . import Button, Frame, ButtonBox, Entry, Dialog, Label
 
 class SelectLearningDataDialog(Dialog):
-  def __init__(self, master, title=None, defaultPath='', getFilePathDialog=None, writeNetworkParam=None, onSelectLearningData=None):
+  def __init__(self, master, title=None, defaultValues={}, getFilePathDialog=None, writeNetworkParam=None, onSelectLearningData=None):
     self.width = 752
     self.height = 380
-    self.dataPath = defaultPath
+    self.dataPath = defaultValues.get('path', '')
     self.writeNetworkParam = writeNetworkParam
     self.getFilePathDialog = getFilePathDialog
     self.onSelectLearningData = onSelectLearningData
@@ -29,7 +29,7 @@ class SelectLearningDataDialog(Dialog):
   
     self.minimum = StyledTextField(master=paramFrame, text='minimum error', defaultValue=1e-5, bindText='1e-')
     self.epochs = StyledTextField(master=paramFrame, text='epochs', defaultValue=100)
-    self.updateFrequency = StyledTextField(master=paramFrame, text='update frequency', defaultValue=100)
+    self.outputFrequency = StyledTextField(master=paramFrame, text='output frequency', defaultValue=100)
     self.updateInterval = StyledTextField(master=paramFrame, text='update interval', defaultValue=2)
   
   def _buttonbox(self, master):
@@ -52,9 +52,8 @@ class SelectLearningDataDialog(Dialog):
       return
     self.writeNetworkParam({
       'error': self.minimum.get(),
-      'epoch': self.epochs.get(),
-      'freq': self.updateFrequency.get(),
-      'interval': self.updateInterval.get()
+      'epochs': self.epochs.get(),
+      'output': self.outputFrequency.get()
     })
 
 class StyledTextField(Entry):
