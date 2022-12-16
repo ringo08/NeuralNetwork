@@ -123,7 +123,7 @@ class Network:
   def _init_weight(self, in_num, out_num):
     return [[random.uniform(-2, 2) for _ in range(in_num)] for _ in range(out_num)]
 
-  def learning(self, input_values, targets, n=0.5):
+  def learning(self, input_values, targets, n=0.99):
     NNUM = len(self.layers)
     score = []
     for index, input_layer in enumerate(input_values):
@@ -169,7 +169,7 @@ if __name__ == '__main__':
 
   learning_data = [[0, 0], [0, 1], [1, 0], [1, 1]]
   target_data = [[0], [1], [1], [0]]
-  score = net.learning(learning_data, target_data, n=0.99, error=1e-5)[1:]
+  score = net.learning(learning_data, target_data, error=1e-5)[1:]
 
   player = ''
   while True:
