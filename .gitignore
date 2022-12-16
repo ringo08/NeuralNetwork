@@ -8,5 +8,6 @@ build/
 
 config/*
 !src/
+!__init__.py
 !settingConfig.py
 !app.py
