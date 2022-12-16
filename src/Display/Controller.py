@@ -117,8 +117,8 @@ class Controller:
     return SelectLearningDataDialog(
       master=master,
       title='learning prop',
+      defaultValues={ 'path': self.model.learningDataPath, **self.model.readSettingFile() },
       getFilePathDialog=self.getFilePathDialog,
-      defaultPath=self.model.learningDataPath,
       onSelectLearningData=self.onSelectLearningData,
       writeNetworkParam=self.model.writeNetworkParam
     )

@@ -5,8 +5,10 @@ class SelectLearningDataDialog(Dialog):
   def __init__(self, master, title=None, defaultValues={}, getFilePathDialog=None, writeNetworkParam=None, onSelectLearningData=None):
     self.width = 752
     self.height = 380
+    self.defaultValues = defaultValues
     self.dataPath = defaultValues.get('path', '')
     self.writeNetworkParam = writeNetworkParam
+    print(self.defaultValues)
     self.getFilePathDialog = getFilePathDialog
     self.onSelectLearningData = onSelectLearningData
     super().__init__(master, title=title, width=self.width, height=self.height)
@@ -27,10 +29,10 @@ class SelectLearningDataDialog(Dialog):
     paramFrame = Frame(master, width=624, height=256)
     paramFrame.pack(fill=tk.BOTH, padx=48, pady=8, ipady=16, ipadx=16, expand=True)
   
-    self.minimum = StyledTextField(master=paramFrame, text='minimum error', defaultValue=1e-5, bindText='1e-')
-    self.epochs = StyledTextField(master=paramFrame, text='epochs', defaultValue=100)
-    self.outputFrequency = StyledTextField(master=paramFrame, text='output frequency', defaultValue=100)
-    self.updateInterval = StyledTextField(master=paramFrame, text='update interval', defaultValue=2)
+    self.minimum = StyledTextField(master=paramFrame, text='minimum error', defaultValue=self.defaultValues.get('error', 1e-5), bindText='1e-')
+    self.epochs = StyledTextField(master=paramFrame, text='epochs', defaultValue=int(self.defaultValues.get('epochs', 100)))
+    self.batch = StyledTextField(master=paramFrame, text='batch size', defaultValue=int(self.defaultValues.get('batch', 100)))
+    self.updateInterval = StyledTextField(master=paramFrame, text='update interval', defaultValue=self.defaultValues.get('freq', 1))
   
   def _buttonbox(self, master):
     self.footer = [
@@ -53,7 +55,8 @@ class SelectLearningDataDialog(Dialog):
     self.writeNetworkParam({
       'error': self.minimum.get(),
       'epochs': self.epochs.get(),
-      'output': self.outputFrequency.get()
+      'batch': self.batch.get(),
+      'interval': self.updateInterval.get()
     })
 
 class StyledTextField(Entry):

@@ -200,7 +200,9 @@ class Model:
 # Train Setting Dialog Function
   # Set training params
   def writeNetworkParam(self, data):
-    columns = ['error', 'epochs', 'output', 'interval']
+    columns = ['error', 'epochs', 'batch', 'interval']
+    print(columns)
+    print(data)
     fpath = self.dataPath['setting']
     if columns != list(data.keys()):
       return
@@ -288,11 +290,9 @@ class Model:
     if not os.path.isfile(self.dataPath['setting']):
       return {}
     contents = self._read_file(self.dataPath['setting'])
-    array = ['error', 'epoch', 'updateFreqency', 'updateInterval']
+    array = ['error', 'epoch', 'batch', 'interval']
     values = [float(column.strip()) for column in contents[-1].split(self.sep) if is_num(column.strip())]
-    setting = { key: value for key, value in zip(array, values) }
-
-    return setting
+    return { key: value for key, value in zip(array, values) }
 
   def onInitWeight(self, func):
     if self.isExistNetwork():

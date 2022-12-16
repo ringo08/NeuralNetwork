@@ -77,7 +77,7 @@ class Layer:
     for nn in next_layer.neurons:
       nn.add(self.get_values())
 
-  def backward(self, frontLayer, errors, n=0.5):
+  def backward(self, frontLayer, errors, n):
     new_errors = []
     weights = [[] for _ in range(self.num)]
     biases = []

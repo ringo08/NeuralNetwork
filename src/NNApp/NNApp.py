@@ -166,7 +166,7 @@ class NNApp:
     if not (os.path.isfile(self.data_path['learning']) and os.path.isfile(self.data_path['setting'])):
       return
     self.learning_data, self.target_data = self._read_learning_data(self.data_path['learning'])
-    self.error, self.epoch, self.freq, self.interval = self._read_setting_file(self.data_path['setting'])
+    self.error, self.epoch, self.batch, self.interval = self._read_setting_file(self.data_path['setting'])
 
   def train_network(self, n=0.99):
     count = 0
@@ -194,7 +194,7 @@ class NNApp:
         n=n,
       )
 
-      if count%self.freq==0:
+      if count%self.batch==0:
         self.score = mean(score)
         answer.append(self.score)
         index = e%len(self.target_data)
