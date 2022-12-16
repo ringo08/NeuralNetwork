@@ -3,8 +3,8 @@ from . import Frame, Dialog, Label
 
 class ReviewDialog(Dialog):
   def __init__(self, master, title, onUpdate=None, maxScale=0):
-    self.width = 744
-    self.height = 364
+    self.width = 320
+    self.height = 224
     self.master = master
     self.maxScale = maxScale
     self.onUpdate = onUpdate
@@ -20,26 +20,27 @@ class ReviewDialog(Dialog):
 
   def _body(self, master):
     bodyFrame = Frame(master, width=self.width, height=self.height)
-    bodyFrame.pack(fill=tk.BOTH, anchor=tk.CENTER, padx=32, pady=16, expand=True)
+    bodyFrame.pack(fill=tk.BOTH, anchor=tk.CENTER, padx=16, pady=8, expand=True)
     
-    viewFrame = Frame(bodyFrame, width=624, height=64)
-    viewFrame.pack(fill=tk.X, pady=16, padx=48)
+    viewFrame = Frame(bodyFrame, width=self.width, height=64)
+    viewFrame.pack(fill=tk.X, padx=48)
 
-    self.lossLabel = Label(viewFrame, width=480, text=f'loss: {self.loss}', side=tk.TOP, expand=True)
-    self.epochLabel = Label(viewFrame, width=480, text=f'epoch: {self.epoch}', side=tk.TOP, expand=True)
+    self.lossLabel = Label(viewFrame, width=self.width, text=f'loss: {self.loss}', side=tk.TOP, expand=True)
+    self.epochLabel = Label(viewFrame, width=self.width, text=f'epoch: {self.epoch}', side=tk.TOP, expand=True)
 
     scaleFrame = Frame(bodyFrame, width=self.width, height=64)
-    scaleFrame.pack(fill=tk.BOTH, side=tk.TOP, padx=32, pady=8)
+    scaleFrame.pack(fill=tk.BOTH, side=tk.TOP, padx=8, expand=True)
     
     self.select = tk.IntVar()
     self.scale = tk.Scale(
       scaleFrame, 
       variable = self.select,
       orient=tk.HORIZONTAL,
-      length = 300,
+      length = self.width,
       width = 20,
       to = self.maxScale,
-      tickinterval=10
+      tickinterval=10,
+      bg='#FAFAFA'
     )
     self.scale.bind("<ButtonRelease-1>", self.onScroll)
     self.scale.pack()
@@ -49,9 +50,12 @@ class ReviewDialog(Dialog):
     loss = self.onUpdate(index=index)
     if not loss:
       return
-    loss = loss[index]
+    self.loss = loss[index]
     self.epoch = index
-    self.loss = loss
+    if self.maxScale != len(loss):
+      self.maxScale = len(loss)
+      self.scale.config(to=self.maxScale)
+      self.update()
     self.lossLabel.setText(f'loss: {self.loss}')
     self.epochLabel.setText(f'epoch: {self.epoch}')
     
