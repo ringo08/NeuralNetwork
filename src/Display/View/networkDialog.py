@@ -61,6 +61,7 @@ class NetworkDialog(DialogFrame):
       self.graph.setData(loss)
       self.updateProgress(len(loss), loss[-1])
     self.connection.update_boxes(layerOuts, weights)
+    return loss
 
   def _init_footer(self, master):
     pass

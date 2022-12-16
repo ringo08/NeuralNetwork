@@ -17,6 +17,7 @@ from .trainDialog import TrainDialog as TrainDialog
 from .paramDialog import ParamDialog as ParamDialog
 from .testDialog import TestDialog as TestDialog
 from .networkDialog import NetworkDialog as NetworkDialog
+from .reviewDialog import ReviewDialog as ReviewDialog
 from .propertyDialog import PropertyDialog as PropertyDialog
 from .networkSettingDialog import NetworkSettingDialog as NetworkSettingDialog
 from .createLearningDataDialog import CreateLearningDataDialog as CreateLearningDataDialog
@@ -39,6 +40,7 @@ __all__ = [
   'TrainDialog',
   'ParamDialog',
   'TestDialog',
+  'ReviewDialog',
   'PropertyDialog',
   'NetworkDialog',
   'NetworkSettingDialog',

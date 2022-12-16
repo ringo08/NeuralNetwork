@@ -33,7 +33,7 @@ class Model:
     self.messages = Messages.Messages(config)
     self.menuColumns = [
       { 'value': 'network', 'label': self.messages.get('menu.network'), 'always': True },
-      { 'value': 'onehot', 'label': self.messages.get('menu.onehot'), 'always': False },
+      { 'value': 'review', 'label': self.messages.get('menu.review'), 'always': False },
       { 'value': 'createData', 'label': self.messages.get('menu.createData'), 'always': True },
       { 'value': 'train', 'label': self.messages.get('menu.train'), 'always': False },
       { 'value': 'test', 'label': self.messages.get('menu.test'), 'always': False },
@@ -201,8 +201,6 @@ class Model:
   # Set training params
   def writeNetworkParam(self, data):
     columns = ['error', 'epochs', 'batch', 'interval']
-    print(columns)
-    print(data)
     fpath = self.dataPath['setting']
     if columns != list(data.keys()):
       return
@@ -239,6 +237,7 @@ class Model:
     datas = self.readLearningDataFile(self.dataPath['learning'])
     fileIndex = -1 if isInit else fileIndex
     getIndex = fileIndex if fileIndex != None else -2
+    getIndex = getIndex+4 if getIndex >= 0 else getIndex
     flag = (operation == self.config['Operate']['start']) or isInit
     if not (flag or bool(fileIndex)):
       return

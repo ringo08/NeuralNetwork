@@ -57,7 +57,7 @@ class Graph(Frame):
     minimum = self.minimum - 2
     yRange = (abs(minimum) + abs(self.maximum))
     self.maxPoint = len(self.data)
-  
+
     if self.maxPoint < 1:
       return
     xtickPoint = int(self.maxPoint/10)

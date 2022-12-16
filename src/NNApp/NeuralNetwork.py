@@ -1,4 +1,5 @@
 import math, random
+from .NetworkParam import h, K, defaultWeight
 
 def is_num(s):
   try:
@@ -8,14 +9,12 @@ def is_num(s):
   else:
     return True
 
-K=5
 def sigmoid(x: float):
   return 1 / (1 + math.exp(-(K*x)))
 
 def relu(x: float):
   return x * (x > 0.0)
 
-h = 0.001
 def derivative(f, x):
   return (f(x+h) - f(x)) / h
 
@@ -121,7 +120,7 @@ class Network:
         layer.update_attribute(self.all_w[i], self.biases[i])
 
   def _init_weight(self, in_num, out_num):
-    return [[random.uniform(-2, 2) for _ in range(in_num)] for _ in range(out_num)]
+    return [[random.uniform(-defaultWeight, defaultWeight) for _ in range(in_num)] for _ in range(out_num)]
 
   def learning(self, input_values, targets, n=0.99):
     NNUM = len(self.layers)

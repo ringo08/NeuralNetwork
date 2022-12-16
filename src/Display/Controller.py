@@ -8,7 +8,8 @@ from .View import (
   SelectLearningDataDialog,
   TrainDialog,
   TestDialog,
-  ParamDialog
+  ParamDialog,
+  ReviewDialog
 )
 import tkinter as tk
 from tkinter import filedialog
@@ -26,6 +27,7 @@ class Controller:
   def bind_UI(self):
     self.menu.setCommands({
       'network': self.overwriteNetwork,
+      'review': self.openReviewNetwork,
       'property': self.openPropertyDialog,
       'train': self.openTrainDialog,
       'createData': self.openCreateLearningDataDialog,
@@ -57,6 +59,18 @@ class Controller:
       self.menu.changeMenuMode(True)
     self.model.layerNums = list(result)
     self.openNetworkDialog(result)
+
+  def openReviewNetwork(self):
+    if not self.networkDialog:
+      self.openNetworkDialog(self.model.layerNums)
+    updateDisplay = self.NetworkDialog.onUpdateDisplay
+    return ReviewDialog(
+      master=self.networkDialog,
+      maxScale=100,
+      onUpdate=updateDisplay,
+      title='Review'
+    )
+
 
   def saveNetwork(self):
     fpath = self.getFilePathDialog(title='Save As', isDir=True, isSave=True)

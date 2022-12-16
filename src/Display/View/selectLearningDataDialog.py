@@ -8,7 +8,6 @@ class SelectLearningDataDialog(Dialog):
     self.defaultValues = defaultValues
     self.dataPath = defaultValues.get('path', '')
     self.writeNetworkParam = writeNetworkParam
-    print(self.defaultValues)
     self.getFilePathDialog = getFilePathDialog
     self.onSelectLearningData = onSelectLearningData
     super().__init__(master, title=title, width=self.width, height=self.height)

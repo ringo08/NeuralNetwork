@@ -5,9 +5,9 @@ messages = {
       'en': 'create network',
       'ja': 'ネットワーク作成'
     },
-    'onehot': {
-      'en': 'onehot',
-      'ja': 'onehot化'
+    'review': {
+      'en': 'review',
+      'ja': '履歴表示'
     },
     'createData': {
       'en': 'create data',
