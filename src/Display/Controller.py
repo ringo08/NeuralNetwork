@@ -61,7 +61,7 @@ class Controller:
     self.openNetworkDialog(result)
 
   def openReviewNetwork(self):
-    if not self.networkDialog:
+    if not self.networkDialog.winfo_exists():
       self.openNetworkDialog(self.model.layerNums)
     updateDisplay = self.NetworkDialog.onUpdateDisplay
     return ReviewDialog(
@@ -82,7 +82,7 @@ class Controller:
     self.master.destroy()
 
   def openNetworkDialog(self, defaultLayer=[2, 2, 1]):
-    if self.networkDialog:
+    if self.networkDialog and self.networkDialog.winfo_exists():
       self.networkDialog.destroy()
     self.networkDialog = tk.Toplevel(self.master)
     
@@ -147,7 +147,7 @@ class Controller:
     )
 
   def openTrainDialog(self):
-    if self.trainDialog:
+    if self.testDialog and self.testDialog.winfo_exists():
       self.trainDialog.destroy()
     self.trainDialog = tk.Toplevel(self.master)
     updateDisplay = self.NetworkDialog.onUpdateDisplay
@@ -162,7 +162,7 @@ class Controller:
     )
 
   def openTestDataDialog(self):
-    if self.testDialog:
+    if self.testDialog and self.testDialog.winfo_exists():
       self.testDialog.destroy()
     self.testDialog = tk.Toplevel(self.master)
     

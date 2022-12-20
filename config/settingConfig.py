@@ -36,11 +36,19 @@ def configWrite(path_config=''):
     'close': 'CLOSE'
   }
 
+  config['Setting'] = {
+    'error': '1e-05',
+    'epochs': '100',
+    'batch': '100',
+    'interval': '1'
+  }
+
   with open(path_config, 'w') as file:
     config.write(file)
 
 
 def configUpdate(config, data, path_config=''):
+  path_config = path_config if path_config else config['Paths']['configfile']
   if not path_config:
     return
   config.read(path_config)

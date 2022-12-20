@@ -90,6 +90,7 @@ class Model:
   def readNetworkFile(self, fileIndex=None, isInit=False):
     fpath = self.dataPath['construction'] if isInit else self.dataPath['parameter']
     getIndex = fileIndex if fileIndex != None else -2
+    getParamIndex = getIndex+3 if getIndex >= 0 else getIndex
     with open(fpath, 'rt', encoding='utf-8') as file:
       lines = file.readlines()
     if len(lines) == self.loadIndexMemory and not isInit:
@@ -97,7 +98,7 @@ class Model:
     self.loadIndexMemory = len(lines)
     self.all_w = None
     self.biases = None
-    flat_array = [float(s.strip()) if is_num(s.strip()) else 0 for s in lines[getIndex].split(',')]
+    flat_array = [float(s.strip()) if is_num(s.strip()) else 0 for s in lines[getParamIndex].split(',')]
     if all([not bool(s) for s in flat_array]):
       return
     biases = []
@@ -206,7 +207,8 @@ class Model:
       return
     wtype = 'wt' if os.path.isfile(fpath) else 'at'
     self._output_file(fpath, ','.join(columns), write_type=wtype)
-    self._output_file(fpath, ','.join([data[column] for column in columns]))
+    self._output_file(fpath, ','.join([data[column] for column in columns])) 
+    configUpdate(self.config, { 'Setting': data })
 
   def onChangeTrainOperation(self, flag):
     if self.readOperation() == self.config['Operate']['end']:
@@ -237,20 +239,20 @@ class Model:
     datas = self.readLearningDataFile(self.dataPath['learning'])
     fileIndex = -1 if isInit else fileIndex
     getIndex = fileIndex if fileIndex != None else -2
-    getIndex = getIndex+4 if getIndex >= 0 else getIndex
+    getOutputIndex = getIndex+4 if getIndex >= 0 else getIndex
     flag = (operation == self.config['Operate']['start']) or isInit
     if not (flag or bool(fileIndex)):
       return
     lines = self._read_file(self.dataPath['output'])
     if lines is None:
       return
-    if len(lines)-3 < abs(getIndex):
+    if len(lines)-3 < abs(getOutputIndex):
       return
     header = lines[1]
     input_num, hidden_num, output_num = [int(line.strip()) for line in header.split(',')]
 
     loss = [float(line.split(',')[0].strip()) for line in lines[4:] if line.split(',')[0].strip() != '']
-    flat_array = [float(line.strip()) if line != '' else None for line in lines[getIndex].split(',')]
+    flat_array = [float(line.strip()) if line != '' else None for line in lines[getOutputIndex].split(',')]
     index = int(flat_array[1])
     flat_array = flat_array[2:]
     input_out = flat_array[:input_num]
@@ -287,9 +289,9 @@ class Model:
   # Load setting data file
   def readSettingFile(self):
     if not os.path.isfile(self.dataPath['setting']):
-      return {}
+      return dict({ key: float(value) for key, value in self.config['Setting'].items() })
     contents = self._read_file(self.dataPath['setting'])
-    array = ['error', 'epoch', 'batch', 'interval']
+    array = ['error', 'epochs', 'batch', 'interval']
     values = [float(column.strip()) for column in contents[-1].split(self.sep) if is_num(column.strip())]
     return { key: value for key, value in zip(array, values) }
 

@@ -1,5 +1,5 @@
 import math, random
-from .NetworkParam import h, K, defaultWeight
+from .NetworkParam import h, K, weightRange as wRange
 
 def is_num(s):
   try:
@@ -120,7 +120,7 @@ class Network:
         layer.update_attribute(self.all_w[i], self.biases[i])
 
   def _init_weight(self, in_num, out_num):
-    return [[random.uniform(-defaultWeight, defaultWeight) for _ in range(in_num)] for _ in range(out_num)]
+    return [[random.uniform(-wRange, wRange) for _ in range(in_num)] for _ in range(out_num)]
 
   def learning(self, input_values, targets, n=0.99):
     NNUM = len(self.layers)
