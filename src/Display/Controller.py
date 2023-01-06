@@ -66,7 +66,6 @@ class Controller:
     updateDisplay = self.NetworkDialog.onUpdateDisplay
     return ReviewDialog(
       master=self.networkDialog,
-      maxScale=100,
       onUpdate=updateDisplay,
       title='Review'
     )

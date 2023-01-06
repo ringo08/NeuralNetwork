@@ -17,6 +17,11 @@ class TrainDialog(DialogFrame):
     self.afterId = None
     super().__init__(master, title=title, width=self.width, height=self.height)
 
+  def __del__(self):
+    if self.afterId is not None:
+      self.after_cancel(self.afterId)
+      self.afterId = None
+  
   def init_body(self, master):
     super().init_body(master, func=self._init_body)
 
