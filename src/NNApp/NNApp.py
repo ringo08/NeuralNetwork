@@ -27,7 +27,7 @@ class NNApp:
     target_data = []
     with open(fpath, 'rt', encoding='utf-8') as file:
       contents = file.readlines()[1:]
-    learning_num, target_num = tuple(int(value.strip()) for value in contents[0].split(','))
+    learning_num, target_num = tuple([int(value.strip()) for value in contents[0].split(',')])
     
     for content in contents[1:]:
       texts = content.split(',')
@@ -38,16 +38,16 @@ class NNApp:
   def _read_setting_file(self, fpath):
     with open(fpath, 'rt', encoding='utf-8') as file:
       contents = file.readlines()
-    return (float(column.strip()) for column in contents[-1].split(',') if is_num(column.strip()))
+    return tuple([float(column.strip()) for column in contents[-1].split(',') if is_num(column.strip())])
 
   def _read_net_file(self, fpath):
     with open(fpath, 'rt', encoding='utf-8') as file:
       text = file.readlines()
-    self.input_num, self.hidden_num, self.output_num = (int(s.strip()) for s in text[1].split(','))
+    self.input_num, self.hidden_num, self.output_num = tuple([int(s.strip()) for s in text[1].split(',')])
     self.all_w = None
     self.biases = None
-    nums = (self.input_num, self.hidden_num, self.output_num)
-    flat_array = (float(s.strip()) if is_num(s.strip()) else 0 for s in text[-1].split(','))
+    nums = tuple([self.input_num, self.hidden_num, self.output_num])
+    flat_array = tuple([float(s.strip()) if is_num(s.strip()) else 0 for s in text[-1].split(',')])
     if all((not bool(s) for s in flat_array)):
       return
     biases = []
@@ -91,13 +91,11 @@ class NNApp:
     self._output_file(fpath, "input_num, hidden_num, output_num", write_type='wt')
     self._output_file(fpath, f"{input_num}, {hidden_num}, {output_num}")
     numdict = { 'input_num': input_num, 'hidden_num': hidden_num, 'output_num': output_num }
-    f = lambda nums: ','.join((str(i) for i in range(nums)))
-    self._output_file(fpath, f"loss, test_index, {','.join((f'{key}({f(value)})' for key, value in numdict.items()))}")  
+    f = lambda nums: ','.join([str(i) for i in range(nums)])
+    self._output_file(fpath, f"loss, test_index, {','.join([f'{key}({f(value)})' for key, value in numdict.items()])}") 
 
   def _print_bw(self, text, front_num, back_num=1):
-    array = []
-    for b in range(back_num):
-      array.extend([f'{text}{b+1}-b' if f == 0 else f'{text}{b+1}-w{f}' for f in range(front_num+1)])
+    array = tuple([f'{text}{b+1}-b' if f == 0 else f'{text}{b+1}-w{f}' for f in range(front_num+1) for b in range(back_num)])
     return ','.join(array)
 
   def clearNetwork(self):
@@ -130,18 +128,18 @@ class NNApp:
       self.output_network(fpath)
       self.output_network(self.data_path['parameter'])
       self.output_layer_out(self.data_path['output'], index=0)
-    return (self.input_num, self.hidden_num, self.output_num)
+    return tuple([self.input_num, self.hidden_num, self.output_num])
 
   def output_network(self, outFile, sep=','):
     if not self.network:
       return
-    string = sep.join((
-      sep.join((
+    string = sep.join([
+      sep.join([
         sep.join(
-          ('{:.3f}'.format(neuron.bias), *('{:.3f}'.format(w) if alive else str(0) for w, alive in zip(neuron.weight, neuron.alive)))
+          ['{:.3f}'.format(neuron.bias), *('{:.3f}'.format(w) if alive else str(0) for w, alive in zip(neuron.weight, neuron.alive))]
         ) for neuron in layer.neurons
-      )) for layer in self.network.layers[1:]
-    ))
+      ]) for layer in self.network.layers[1:]
+    ])
     with open(outFile, 'at', encoding='utf-8') as f:
       print(string, file=f)
 
@@ -149,10 +147,10 @@ class NNApp:
     if not self.network:
       return
     string = '{:.3e}'.format(score) if score != None else ''
-    string += sep + str(index) + sep + sep.join((
-      sep.join(('{:.3f}'.format(neuron.get()) for neuron in layer.neurons))
+    string += sep + str(index) + sep + sep.join([
+      sep.join(['{:.3f}'.format(neuron.get()) for neuron in layer.neurons])
       for layer in self.network.layers
-    ))
+    ])
     with open(outFile, 'at', encoding='utf-8') as f:
       print(string, file=f)
 
@@ -222,9 +220,9 @@ class NNApp:
       return
 
     values = self.network.fit(self.test_input_data[test_index])
-    outs = ((neuron.get() for neuron in layer.neurons) for layer in self.network.layers)
-    weights = (((w*alive for w, alive in zip(neuron.weight, neuron.alive)) for neuron in layer.neurons) for layer in self.network.layers[1:])
-    return (outs, weights, [self.test_input_data[test_index], self.test_target_data[test_index]])
+    outs = tuple([tuple([neuron.get() for neuron in layer.neurons]) for layer in self.network.layers])
+    weights = tuple([tuple([tuple([w*alive for w, alive in zip(neuron.weight, neuron.alive)]) for neuron in layer.neurons]) for layer in self.network.layers[1:]])
+    return tuple([outs, weights, tuple([self.test_input_data[test_index], self.test_target_data[test_index]])])
 
 # main
 def main(config):

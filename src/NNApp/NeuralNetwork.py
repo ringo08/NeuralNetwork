@@ -56,9 +56,9 @@ class Layer:
   def __init__(self, weights=[], biases=[], num=0, is_input=False):
     self.num = num if num > 0 else len(weights)
     if is_input:
-      self.neurons = (Neuron() for _ in range(self.num))
+      self.neurons = tuple([Neuron() for _ in range(self.num)])
     else:
-      self.neurons = (Neuron(init_weight=weights[i], init_bias=biases[i]) for i in range(self.num))
+      self.neurons = tuple([Neuron(init_weight=weights[i], init_bias=biases[i]) for i in range(self.num)])
 
   def update_attribute(self, weights, biases):
     for i, neuron in enumerate(self.neurons):
@@ -70,7 +70,7 @@ class Layer:
       neuron.set_value(input_value[i])
 
   def get_values(self):
-    return (neuron.get() for neuron in self.neurons)
+    return tuple([neuron.get() for neuron in self.neurons])
 
   def forward(self, next_layer):
     for nn in next_layer.neurons:
@@ -78,7 +78,7 @@ class Layer:
 
   def backward(self, frontLayer, errors, n):
     new_errors = []
-    weights = ([] for _ in range(self.num))
+    weights = tuple([[] for _ in range(self.num)])
     biases = []
     for sn in range(self.num):
       neuron = self.neurons[sn]
@@ -90,7 +90,7 @@ class Layer:
       for fn in range(frontLayer.num):
         out_front = frontLayer.neurons[fn].get()
         weights[sn].append(neuron.weight[fn]-n*out_front*back)
-    return weights, biases, new_errors
+    return weights, tuple(biases), tuple(new_errors)
 
 
 class Network:

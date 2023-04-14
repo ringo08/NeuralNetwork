@@ -45,8 +45,8 @@ class Model:
 
   def __del__(self):
     if self.process:
-      print('process kill')
       self.process.terminate()
+      self.process = None
 
   def _read_file(self, path):
     if not os.path.isfile(path):
@@ -61,9 +61,7 @@ class Model:
       print(string, file=file)
 
   def _print_bw(self, text, front_num, back_num=1):
-    array = []
-    for b in range(back_num):
-      array.extend([f'{text}{b+1}-b' if f == 0 else f'{text}{b+1}-w{f}' for f in range(front_num+1)])
+    array = tuple([tuple([f'{text}{b+1}-b' if f == 0 else f'{text}{b+1}-w{f}' for f in range(front_num+1)]) for b in range(back_num)])
     return ','.join(array)
   
   def _makeBaseDir(self):
@@ -98,7 +96,7 @@ class Model:
     self.loadIndexMemory = len(lines)
     self.all_w = None
     self.biases = None
-    flat_array = (float(s.strip()) if is_num(s.strip()) else 0 for s in lines[getParamIndex].split(','))
+    flat_array = tuple([float(s.strip()) if is_num(s.strip()) else 0 for s in lines[getParamIndex].split(',')])
     if all((not bool(s) for s in flat_array)):
       return
     biases = []
@@ -127,9 +125,6 @@ class Model:
 
 # Create Network
   def createNetwork(self, out=False):
-    if self.process:
-      self.process.terminate()
-      self.process = None
     if self.process:
       self.process.terminate()
       self.process = None
@@ -165,13 +160,13 @@ class Model:
     if not any((k in data.keys() for k in learningColumns)):
       print('not found items')
       return
-    headerColumns = ','.join((data for data in learningColumns))
+    headerColumns = ','.join([data for data in learningColumns])
     self._output_file(fpath, headerColumns, write_type='wt')
 
-    learningDatas = (data[column] for column in learningColumns)
-    headerParams = ','.join((str(len(datas[0].split(' '))) for datas in learningDatas))
+    learningDatas = tuple([data[column] for column in learningColumns])
+    headerParams = ','.join([str(len(datas[0].split(' '))) for datas in learningDatas])
     self._output_file(fpath, headerParams)
-    inputData, targetData = tuple(learningDatas)
+    inputData, targetData = learningDatas
     for idata, tdata in zip(inputData, targetData):
       string = idata.replace(' ', ', ')
       string += ', ' + tdata.replace(' ', ', ')
@@ -185,31 +180,31 @@ class Model:
       return
     file = self._read_file(fpath)
     header, contents = (file[1], file[2:])
-    columns = (int(value.strip()) for value in header.split(self.sep))
+    columns = tuple([int(value.strip()) for value in header.split(self.sep)])
     if not (len(columns) == 2 and all(columns)):
       self.onError('Invalid learning data')
       return False
 
-    learning_num, target_num = tuple(columns)
+    learning_num, target_num = columns
     for row in contents:
-      values = (int(value.strip()) for value in row.split(self.sep))
+      values = tuple([int(value.strip()) for value in row.split(self.sep)])
       if not (learning_num+target_num == len(values)):
         self.onError('Invalid learning data')
         return False
       learning_data.append(values[:learning_num])
       target_data.append(values[learning_num:])
-    return learning_data, target_data
+    return tuple(learning_data), tuple(target_data)
 
 # Train Setting Dialog Function
   # Set training params
   def writeNetworkParam(self, data):
     columns = ('error', 'epochs', 'batch', 'interval')
     fpath = self.dataPath['setting']
-    if columns != list(data.keys()):
+    if columns != tuple(data.keys()):
       return
     wtype = 'wt' if os.path.isfile(fpath) else 'at'
     self._output_file(fpath, ','.join(columns), write_type=wtype)
-    self._output_file(fpath, ','.join((data[column] for column in columns))) 
+    self._output_file(fpath, ','.join([data[column] for column in columns])) 
     configUpdate(self.config, { 'Setting': data })
 
   def onChangeTrainOperation(self, flag):
@@ -251,10 +246,10 @@ class Model:
     if len(lines)-3 < abs(getOutputIndex):
       return
     header = lines[1]
-    input_num, hidden_num, output_num = (int(line.strip()) for line in header.split(','))
+    input_num, hidden_num, output_num = tuple([int(line.strip()) for line in header.split(',')])
 
-    loss = (float(line.split(',')[0].strip()) for line in lines[4:] if line.split(',')[0].strip() != '')
-    flat_array = (float(line.strip()) if line != '' else None for line in lines[getOutputIndex].split(','))
+    loss = tuple([float(line.split(',')[0].strip()) for line in lines[4:] if line.split(',')[0].strip() != ''])
+    flat_array = tuple([float(line.strip()) if line != '' else None for line in lines[getOutputIndex].split(',')])
     index = int(flat_array[1])
     flat_array = flat_array[2:]
     input_out = flat_array[:input_num]
@@ -266,13 +261,13 @@ class Model:
 
     inputData = datas[0][index] if datas else [0]*input_num
     targetData = datas[1][index] if datas else [0]*output_num
-    return (isInit, loss, (inputData, hidden_out, output_out, targetData), weights)
+    return tuple([isInit, loss, tuple([inputData, hidden_out, output_out, targetData]), weights])
 
   def validateLearingData(self, fpath):
     if not os.path.isfile(fpath):
       return False
     datas = self._read_file(fpath)
-    data = (int(d.strip()) for d in datas[1].split(','))
+    data = tuple([int(d.strip()) for d in datas[1].split(',')])
     validateInOut = (self.network[0], self.network[-1])
     if validateInOut != data:
       self.onError('not equal from network input or output to learning data')
@@ -294,7 +289,7 @@ class Model:
       return dict({ key: float(value) for key, value in self.config['Setting'].items() })
     contents = self._read_file(self.dataPath['setting'])
     array = ('error', 'epochs', 'batch', 'interval')
-    values = (float(column.strip()) for column in contents[-1].split(self.sep) if is_num(column.strip()))
+    values = tuple([float(column.strip()) for column in contents[-1].split(self.sep) if is_num(column.strip())])
     return { key: value for key, value in zip(array, values) }
 
   def onInitWeight(self, func):
@@ -325,7 +320,7 @@ class Model:
       return
     outs, weights, datas = items
     
-    return (True, [], (datas[0], *outs[1:], datas[1]), weights)
+    return tuple([True, [], tuple([datas[0], *outs[1:], datas[1]]), weights])
   
   def onPutFile(self, fpath):
     if not (fpath and self.testDataPath):
@@ -338,7 +333,7 @@ class Model:
       print(lines[1].rstrip() + f',{lines[1].split(",")[-1].strip()}', file=out)
       for index, line in enumerate(lines[2:]):
         outs, _, _ = self.testAnswers[index]
-        print(line.rstrip()+','+','.join(('{:.3f}'.format(ans) for ans in outs[-1])), file=out)
+        print(line.rstrip()+','+','.join(['{:.3f}'.format(ans) for ans in outs[-1]]), file=out)
 
 # Operation    
   def writeOperation(self, key: str):
@@ -351,7 +346,7 @@ class Model:
   def readOperation(self):
     with open(self.config['Paths']['operation'], 'rt', encoding='utf-8') as f:
       lines = f.readlines()
-    return (line.strip().upper() for line in lines)[0]
+    return tuple([line.strip().upper() for line in lines])[0]
 
 # Property Dialog
   def propertySubmit(self, fpath, inputSize, colorRange):

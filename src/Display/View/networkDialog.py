@@ -91,11 +91,11 @@ class Network(Frame):
     self.all_w = self.width / (2*max(self.layers) + 1)
     self.h = self.height / (2*len(self.layers) + 1)
     self.r = self.all_w/2 if self.all_w < self.h else self.h/2
-    self.neurons = []
+    neurons = []
     for i in range(len(self.layers)):
       y = self.height - self.h*(2*i+1.5)
       self.w = self.width / (2*self.layers[i] + 1)
-      neurons = (
+      neuron = tuple([
         self.canvas.create_oval(
           self.w*(2*j+1.5)-self.r,
           y-self.r,
@@ -105,14 +105,15 @@ class Network(Frame):
           fill='#0f0',
           outline='black'
         ) for j in range(self.layers[i])
-      )
-      self.neurons.append(neurons)
-      self.neurons = tuple(self.neurons)
+      ])
+      neurons.append(neuron)
+    self.neurons = tuple(neurons)
+    del neurons, neuron
 
   def create_connection(self):
-    self.weights = []
+    weights = []
     for i in range(1, len(self.layers)):
-      weights = []
+      weight = []
       for j in range(self.layers[i]):
         nextNeuron = self.canvas.bbox(f'network-layer:{i}-neuron:{j}')
         x0 = nextNeuron[2]-self.r
@@ -121,19 +122,21 @@ class Network(Frame):
           frontNeuron = self.canvas.bbox(f'network-layer:{i-1}-neuron:{k}')
           x1 = frontNeuron[2]-self.r
           y1 = frontNeuron[1]
-          weights.append(self.canvas.create_line(x0, y0, x1, y1, tag=f'network-layer:{i}-neuron:{j}-weight:{k}', fill='black', activefill='#0f0'))
-      self.weights.append(tuple(weights))
-      self.weights = tuple(self.weights)
-  
+          weight.append(self.canvas.create_line(x0, y0, x1, y1, tag=f'network-layer:{i}-neuron:{j}-weight:{k}', fill='black', activefill='#0f0'))
+      weights.append(tuple(weight))
+    self.weights = tuple(weights)
+    del weights, weight, nextNeuron, frontNeuron
+
   def click(self, event):
     pic = 1
-    tags = (self.canvas.itemcget(obj, 'tags') for obj in self.canvas.find_overlapping(*((event.x-pic, event.y-pic, event.x+pic, event.y+pic))))
+    tags = tuple([self.canvas.itemcget(obj, 'tags') for obj in self.canvas.find_overlapping(*((event.x-pic, event.y-pic, event.x+pic, event.y+pic)))])
     if len(tags) < 1:
       return
     tagName = tags[0]
     for tag in tags:
       if 'current' in tag:
         tagName = tag.replace('current', '').strip()
+    del tags
     onCut = lambda: self.canvas.delete(tagName)
     self.onClick(tagName, onCut)
 
@@ -155,7 +158,7 @@ class DisplayConnection(Frame):
     for canvas in self.canvas:
       for tag in canvas.get_tags():
         values = tag.split('-')[1:]
-        n = (int(value.split(':')[1]) for value in values)
+        n = tuple([int(value.split(':')[1]) for value in values])
         if 'weight' in tag:
           color = weights[n[0]-1][n[1]][n[2]]
           canvas.update_color(tag, color, self.colorRange)
@@ -209,12 +212,13 @@ class DisplayConnection(Frame):
   
   def click(self, event):
     pic = 2
-    tags = (self.canvas.itemcget(obj, 'tags') for obj in self.canvas.find_overlapping(*((event.x-pic, event.y-pic, event.x+pic, event.y+pic))))
+    tags = tuple([self.canvas.itemcget(obj, 'tags') for obj in self.canvas.find_overlapping(*((event.x-pic, event.y-pic, event.x+pic, event.y+pic)))])
     tagName = None
     for tag in tags:
       tagName = tags[0]
       if 'current' in tag:
         return tag.replace('current', '').strip()
+    del tags
     return tagName
 
 class Canvas(Frame):
@@ -237,18 +241,19 @@ class Canvas(Frame):
 
   def get_tags(self):
     ids = self.canvas.find_all()
-    return (self.canvas.gettags(_id)[0] for _id in ids)
+    return tuple([self.canvas.gettags(_id)[0] for _id in ids])
 
   def create_box(self, box, tagName: str):
     self.canvas.create_rectangle(*box, tag=tagName, fill='black', outline='white', width=0.1)
 
   def click(self, event):
     pic = 2
-    tags = (self.canvas.itemcget(obj, 'tags') for obj in self.canvas.find_overlapping(*((event.x-pic, event.y-pic, event.x+pic, event.y+pic))))
+    tags = tuple([self.canvas.itemcget(obj, 'tags') for obj in self.canvas.find_overlapping(*((event.x-pic, event.y-pic, event.x+pic, event.y+pic)))])
     tagName = None
     for tag in tags:
       tagName = tags[0]
       if 'current' in tag:
         return tag.replace('current', '').strip()
+    del tags
     return tagName
 

@@ -64,15 +64,15 @@ class CreateLearningDataDialog(Dialog):
     data = self.onLoadFile(fpath)
     if not data:
       return
-    inputData, targetData = tuple(data)
+    inputData, targetData = data
     if not (inputData and targetData):
       return
     self.inputList.clearItems()
     self.targetList.clearItems()
     for idata in inputData:
-      self.inputList.insert(tk.END, ' '.join((str(d) for d in idata)))
+      self.inputList.insert(tk.END, ' '.join([str(d) for d in idata]))
     for tdata in targetData:
-      self.targetList.insert(tk.END, ' '.join((str(d) for d in tdata)))
+      self.targetList.insert(tk.END, ' '.join([str(d) for d in tdata]))
     self.actions.buttons['make learning data']['state'] = tk.NORMAL
 
   def makeLearningData(self):

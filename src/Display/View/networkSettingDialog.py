@@ -53,7 +53,7 @@ class NetworkSettingDialog(Dialog):
     self.result = None
     if self.pathLabel:
       self.result = self.pathLabel
-    elif all([v for v in layers.values()]):
+    elif all((v for v in layers.values())):
       self.result = layers
 
 class StyledTextField(Entry):

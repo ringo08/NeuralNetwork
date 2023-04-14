@@ -7,7 +7,7 @@ if __name__ == '__main__':
   with open(f'{path}', 'rt', encoding='utf-8') as f:
     strings = f.readlines()
     sLen = len(strings[0].split(' ')[0])
-    maxTarget = max([int(s.split(' ')[1]) for s in strings])
+    maxTarget = max((int(s.split(' ')[1]) for s in strings))
   
   with open(f'{path.split(".")[0]}.csv', 'wt', encoding='utf-8') as f:
     print(f'{26*sLen}, {maxTarget}', file=f)

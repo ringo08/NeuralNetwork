@@ -39,5 +39,5 @@ class TextField(Entry):
       validate=props['validate']
     )
     
-    frameProps = ['padx', 'pady', 'anchor', 'side', 'fill', 'expand']
+    frameProps = ('padx', 'pady', 'anchor', 'side', 'fill', 'expand')
     frame.pack(**{ key: props[key] for key in frameProps })

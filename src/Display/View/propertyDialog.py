@@ -73,7 +73,7 @@ class PropertyDialog(Dialog):
   def apply(self):
     inputSize = self.inputSizeField.get()
     weightRange = self.weightRangeField.get()
-    if '' in [inputSize, weightRange]:
+    if '' in (inputSize, weightRange):
       return
     if self.rowSize == inputSize and self.weightRange == weightRange:
       return

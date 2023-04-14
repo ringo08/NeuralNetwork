@@ -53,7 +53,7 @@ class Controller:
       self.trainDialog.destroy()
     layers = ('input', 'hidden', 'output')
     if 'input' in networkData:
-      result = self.model.newCreateNetwork(**{f'{layer}_num': int(networkData[layer]) for layer in layers})
+      result = self.model.newCreateNetwork(**{ f'{layer}_num': int(networkData[layer]) for layer in layers })
     else:
       result = self.model.fromFileCreateNetwork(networkData)
 
@@ -80,6 +80,7 @@ class Controller:
     if not self.model.isSaved:
       if tk.messagebox.askyesno('config', 'quit before save?'):
         return
+    self.model.__del__()
     self.master.destroy()
 
   def openNetworkDialog(self, defaultLayer=(2, 2, 1)):
@@ -101,7 +102,7 @@ class Controller:
   def openParamDialog(self, tagName, onCut):
     if tagName is None:
       return
-    params = (int(tag.split(':')[1]) for tag in tagName.split('-')[1:])
+    params = tuple([int(tag.split(':')[1]) for tag in tagName.split('-')[1:]])
     value = self.model.getParam(*params)
     if value is None:
       return

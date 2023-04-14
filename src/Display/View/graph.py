@@ -76,8 +76,8 @@ class Graph(Frame):
       x = (width * n) / self.maxPoint
       coords.append(x)
       coords.append(h*(-1*math.log10(self.data[n])+self.maximum))
-
     self.graphCanvas.coords('line', *coords)
+    del coords
     self.graphCanvas.update()
     self.update()
   
@@ -97,16 +97,16 @@ class Graph(Frame):
 
   def _create_tick_labels(self, canvas, labels=(), ticks=(), tickPad=4, oriental='x'):
     if oriental == 'x':
-      labels = (canvas.create_text(tick, tickPad, text=int(labels[i]), anchor=tk.N, font=('', 10)) for i, tick in enumerate(ticks))
+      labels = tuple([canvas.create_text(tick, tickPad, text=int(labels[i]), anchor=tk.N, font=('', 10)) for i, tick in enumerate(ticks)])
     elif oriental == 'y':
-      labels = (canvas.create_text(tickPad, tick+tickPad, text=int(labels[i]), anchor=tk.W, font=('', 10)) for i, tick in enumerate(ticks))
+      labels = tuple([canvas.create_text(tickPad, tick+tickPad, text=int(labels[i]), anchor=tk.W, font=('', 10)) for i, tick in enumerate(ticks)])
 
     return labels
 
   def _create_ticks_points(self, canvas, ticks=(), tickLen=4, oriental='x'):
     if oriental == 'x':
-      points = ((tick, 0, tick, tickLen) for tick in ticks)
+      points = tuple([(tick, 0, tick, tickLen) for tick in ticks])
     elif oriental == 'y':
-      points = ((self.tickSize-tickLen, tick, self.tickSize, tick) for tick in ticks)
+      points = tuple([(self.tickSize-tickLen, tick, self.tickSize, tick) for tick in ticks])
 
-    return (canvas.create_line(*point) for point in points)
+    return tuple([canvas.create_line(*point) for point in points])
