@@ -86,7 +86,7 @@ class NNApp:
       self._output_file(fpath, f"{input_num}, {hidden_num}, {output_num}")
       self._output_file(fpath, f"{self._print_bw('h', input_num, hidden_num)}, {self._print_bw('o', hidden_num, output_num)}")  
 
-  def createParamHeader(self, input_num=2, hidden_num=2, output_num=1):
+  def createOutputHeader(self, input_num=2, hidden_num=2, output_num=1):
     fpath = self.data_path['output']
     self._output_file(fpath, "input_num, hidden_num, output_num", write_type='wt')
     self._output_file(fpath, f"{input_num}, {hidden_num}, {output_num}")
@@ -158,7 +158,7 @@ class NNApp:
 
   def initWeight(self):
     self.createHeader(self.input_num, self.hidden_num, self.output_num)
-    self.createParamHeader(self.input_num, self.hidden_num, self.output_num)
+    self.createOutputHeader(self.input_num, self.hidden_num, self.output_num)
     self.clearNetwork()
     self.createNetwork(out=True)
 

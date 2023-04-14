@@ -121,13 +121,15 @@ class Model:
       return
     try:
       self.saveNetwork(toPath)
-      shutil.rmtree(self.basePath)
       self._makeBaseDir()
     except Exception as e:
       self.onError(e)
 
 # Create Network
   def createNetwork(self, out=False):
+    if self.process:
+      self.process.terminate()
+      self.process = None
     if self.process:
       self.process.terminate()
       self.process = None
@@ -139,7 +141,7 @@ class Model:
   def newCreateNetwork(self, input_num=2, hidden_num=2, output_num=1):
     self._makeBaseDir()
     self.NNApp.createHeader(input_num, hidden_num, output_num)
-    self.NNApp.createParamHeader(input_num, hidden_num, output_num)
+    self.NNApp.createOutputHeader(input_num, hidden_num, output_num)
     self.createNetwork(True)
     return self.network
 

@@ -2,7 +2,7 @@ import tkinter as tk
 from . import Frame, Dialog, Label
 
 class ReviewDialog(Dialog):
-  def __init__(self, master, title, onUpdate=None, maxScale=0):
+  def __init__(self, master, title, onUpdate=None, maxScale=1):
     self.width = 320
     self.height = 224
     self.master = master
@@ -39,7 +39,6 @@ class ReviewDialog(Dialog):
       length = self.width,
       width = 20,
       to = self.maxScale,
-      tickinterval=10,
       bg='#FAFAFA'
     )
     self.scale.bind("<ButtonRelease-1>", self.onScroll)
@@ -54,7 +53,7 @@ class ReviewDialog(Dialog):
     self.epoch = index
     if self.maxScale != len(loss):
       self.maxScale = len(loss)
-      self.scale.config(to=self.maxScale)
+      self.scale.config(to=self.maxScale, tickinterval=self.maxScale/10)
       self.update()
     self.lossLabel.setText(f'loss: {self.loss}')
     self.epochLabel.setText(f'epoch: {self.epoch}')

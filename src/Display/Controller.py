@@ -49,6 +49,8 @@ class Controller:
     networkData = self.openNetworkSettingDialog().result
     if not networkData:
       return
+    if self.trainDialog and self.trainDialog.winfo_exists():
+      self.trainDialog.destroy()
     layers = ('input', 'hidden', 'output')
     if 'input' in networkData:
       result = self.model.newCreateNetwork(**{f'{layer}_num': int(networkData[layer]) for layer in layers})
@@ -66,7 +68,6 @@ class Controller:
     updateDisplay = self.NetworkDialog.onUpdateDisplay
     return ReviewDialog(
       master=self.networkDialog,
-      maxScale=100,
       onUpdate=updateDisplay,
       title='Review'
     )

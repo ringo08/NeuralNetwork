@@ -15,8 +15,14 @@ class TrainDialog(DialogFrame):
     self.onLearnNetwork = onLearnNetwork
     self.onInitWeight = onInitWeight
     self.afterId = None
+    self.initWeightButton = None
     super().__init__(master, title=title, width=self.width, height=self.height)
 
+  def __del__(self):
+    if self.afterId is not None:
+      self.after_cancel(self.afterId)
+      self.afterId = None
+  
   def init_body(self, master):
     super().init_body(master, func=self._init_body)
 
@@ -47,7 +53,8 @@ class TrainDialog(DialogFrame):
       self.trainButton.setLabel('train')
     else:
       self.trainButton.setLabel('train')
-    self.initWeightButton['state'] = tk.DISABLED if self.isStartTrain else tk.NORMAL
+    if self.initWeightButton:
+      self.initWeightButton['state'] = tk.DISABLED if self.isStartTrain else tk.NORMAL
     
   def _init_footer(self, master):
     pass
