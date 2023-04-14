@@ -130,6 +130,9 @@ class Model:
     if self.process:
       self.process.terminate()
       self.process = None
+    if self.process:
+      self.process.terminate()
+      self.process = None
     self.writeOperation('init')
     self.network = self.NNApp.createNetwork(out=out)
     self.isSaved = False

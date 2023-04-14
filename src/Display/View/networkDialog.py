@@ -9,6 +9,7 @@ class NetworkDialog(DialogFrame):
     self.layers = defaultLayer
     self.onClick = onClick
     self.onUpdate = onUpdate
+    self.progress = None
     super().__init__(master, title=title, width=self.width, height=self.height)
     if minimum:
       self.setMinimumError(minimum)
@@ -46,7 +47,8 @@ class NetworkDialog(DialogFrame):
   
   def updateProgress(self, length, last):
     text = 'epoch: {}, {:.3e} / {:.3e}'.format(1+length, last, 10**(self.graph.minimum))
-    self.progress.setText(text)
+    if self.progress:
+      self.progress.setText(text)
 
   def onResetDisplay(self, inputSize=None, weightRange=None):
     self.connection.replot(inputSize, weightRange)
