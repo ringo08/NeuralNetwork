@@ -9,6 +9,7 @@ class NetworkDialog(DialogFrame):
     self.layers = defaultLayer
     self.onClick = onClick
     self.onUpdate = onUpdate
+    self.progress = None
     super().__init__(master, title=title, width=self.width, height=self.height)
     if minimum:
       self.setMinimumError(minimum)
@@ -46,7 +47,8 @@ class NetworkDialog(DialogFrame):
   
   def updateProgress(self, length, last):
     text = 'epoch: {}, {:.3e} / {:.3e}'.format(1+length, last, 10**(self.graph.minimum))
-    self.progress.setText(text)
+    if self.progress:
+      self.progress.setText(text)
 
   def onResetDisplay(self, inputSize=None, weightRange=None):
     self.connection.replot(inputSize, weightRange)
@@ -92,13 +94,21 @@ class Network(Frame):
     self.neurons = []
     for i in range(len(self.layers)):
       y = self.height - self.h*(2*i+1.5)
-      neurons = []
       self.w = self.width / (2*self.layers[i] + 1)
-      for j in range(self.layers[i]):
-        x = self.w*(2*j+1.5)
-        neurons.append(self.canvas.create_oval(x-self.r, y-self.r, x+self.r, y+self.r, tag=f'network-layer:{i}-neuron:{j}', fill='#0f0', outline='black'))
+      neurons = (
+        self.canvas.create_oval(
+          self.w*(2*j+1.5)-self.r,
+          y-self.r,
+          self.w*(2*j+1.5)+self.r,
+          y+self.r,
+          tag=f'network-layer:{i}-neuron:{j}',
+          fill='#0f0',
+          outline='black'
+        ) for j in range(self.layers[i])
+      )
       self.neurons.append(neurons)
-    
+      self.neurons = tuple(self.neurons)
+
   def create_connection(self):
     self.weights = []
     for i in range(1, len(self.layers)):
@@ -112,11 +122,12 @@ class Network(Frame):
           x1 = frontNeuron[2]-self.r
           y1 = frontNeuron[1]
           weights.append(self.canvas.create_line(x0, y0, x1, y1, tag=f'network-layer:{i}-neuron:{j}-weight:{k}', fill='black', activefill='#0f0'))
-      self.weights.append(weights)
+      self.weights.append(tuple(weights))
+      self.weights = tuple(self.weights)
   
   def click(self, event):
     pic = 1
-    tags = [self.canvas.itemcget(obj, 'tags') for obj in self.canvas.find_overlapping(*((event.x-pic, event.y-pic, event.x+pic, event.y+pic)))]
+    tags = (self.canvas.itemcget(obj, 'tags') for obj in self.canvas.find_overlapping(*((event.x-pic, event.y-pic, event.x+pic, event.y+pic))))
     if len(tags) < 1:
       return
     tagName = tags[0]
@@ -144,7 +155,7 @@ class DisplayConnection(Frame):
     for canvas in self.canvas:
       for tag in canvas.get_tags():
         values = tag.split('-')[1:]
-        n = [int(value.split(':')[1]) for value in values]
+        n = (int(value.split(':')[1]) for value in values)
         if 'weight' in tag:
           color = weights[n[0]-1][n[1]][n[2]]
           canvas.update_color(tag, color, self.colorRange)
@@ -198,7 +209,7 @@ class DisplayConnection(Frame):
   
   def click(self, event):
     pic = 2
-    tags = [self.canvas.itemcget(obj, 'tags') for obj in self.canvas.find_overlapping(*((event.x-pic, event.y-pic, event.x+pic, event.y+pic)))]
+    tags = (self.canvas.itemcget(obj, 'tags') for obj in self.canvas.find_overlapping(*((event.x-pic, event.y-pic, event.x+pic, event.y+pic))))
     tagName = None
     for tag in tags:
       tagName = tags[0]
@@ -226,14 +237,14 @@ class Canvas(Frame):
 
   def get_tags(self):
     ids = self.canvas.find_all()
-    return [self.canvas.gettags(_id)[0] for _id in ids]
+    return (self.canvas.gettags(_id)[0] for _id in ids)
 
   def create_box(self, box, tagName: str):
     self.canvas.create_rectangle(*box, tag=tagName, fill='black', outline='white', width=0.1)
 
   def click(self, event):
     pic = 2
-    tags = [self.canvas.itemcget(obj, 'tags') for obj in self.canvas.find_overlapping(*((event.x-pic, event.y-pic, event.x+pic, event.y+pic)))]
+    tags = (self.canvas.itemcget(obj, 'tags') for obj in self.canvas.find_overlapping(*((event.x-pic, event.y-pic, event.x+pic, event.y+pic))))
     tagName = None
     for tag in tags:
       tagName = tags[0]

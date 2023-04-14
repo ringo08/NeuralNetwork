@@ -46,9 +46,9 @@ class NNApp:
     self.input_num, self.hidden_num, self.output_num = (int(s.strip()) for s in text[1].split(','))
     self.all_w = None
     self.biases = None
-    nums = [self.input_num, self.hidden_num, self.output_num]
-    flat_array = [float(s.strip()) if is_num(s.strip()) else 0 for s in text[-1].split(',')]
-    if all([not bool(s) for s in flat_array]):
+    nums = (self.input_num, self.hidden_num, self.output_num)
+    flat_array = (float(s.strip()) if is_num(s.strip()) else 0 for s in text[-1].split(','))
+    if all((not bool(s) for s in flat_array)):
       return
     biases = []
     all_w = []
@@ -70,7 +70,7 @@ class NNApp:
     return self.config['Operate'][key] == lines.strip()
 
   def _write_end_operation_file(self, key='end'):
-    if not key in ['stop', 'end']:
+    if not key in ('stop', 'end'):
       return
     with open(self.config['Paths']['operation'], 'wt', encoding='utf-8') as f:
       print(self.config['Operate'][key], file=f)
@@ -80,7 +80,7 @@ class NNApp:
       print(string, file=f)
 
   def createHeader(self, input_num=2, hidden_num=2, output_num=1):
-    fpaths = [self.data_path[key] for key in ['construction', 'parameter']]
+    fpaths = (self.data_path[key] for key in ('construction', 'parameter'))
     for fpath in fpaths:
       self._output_file(fpath, "input_num, hidden_num, output_num", write_type='wt')
       self._output_file(fpath, f"{input_num}, {hidden_num}, {output_num}")
@@ -91,8 +91,8 @@ class NNApp:
     self._output_file(fpath, "input_num, hidden_num, output_num", write_type='wt')
     self._output_file(fpath, f"{input_num}, {hidden_num}, {output_num}")
     numdict = { 'input_num': input_num, 'hidden_num': hidden_num, 'output_num': output_num }
-    f = lambda nums: ','.join([str(i) for i in range(nums)])
-    self._output_file(fpath, f"loss, test_index, {','.join([f'{key}({f(value)})' for key, value in numdict.items()])}")  
+    f = lambda nums: ','.join((str(i) for i in range(nums)))
+    self._output_file(fpath, f"loss, test_index, {','.join((f'{key}({f(value)})' for key, value in numdict.items()))}")  
 
   def _print_bw(self, text, front_num, back_num=1):
     array = []
@@ -135,13 +135,13 @@ class NNApp:
   def output_network(self, outFile, sep=','):
     if not self.network:
       return
-    string = sep.join([
-      sep.join([
+    string = sep.join((
+      sep.join((
         sep.join(
           ('{:.3f}'.format(neuron.bias), *('{:.3f}'.format(w) if alive else str(0) for w, alive in zip(neuron.weight, neuron.alive)))
         ) for neuron in layer.neurons
-      ]) for layer in self.network.layers[1:]
-    ])
+      )) for layer in self.network.layers[1:]
+    ))
     with open(outFile, 'at', encoding='utf-8') as f:
       print(string, file=f)
 
@@ -149,10 +149,10 @@ class NNApp:
     if not self.network:
       return
     string = '{:.3e}'.format(score) if score != None else ''
-    string += sep + str(index) + sep + sep.join([
-      sep.join(['{:.3f}'.format(neuron.get()) for neuron in layer.neurons])
+    string += sep + str(index) + sep + sep.join((
+      sep.join(('{:.3f}'.format(neuron.get()) for neuron in layer.neurons))
       for layer in self.network.layers
-    ])
+    ))
     with open(outFile, 'at', encoding='utf-8') as f:
       print(string, file=f)
 
@@ -222,8 +222,8 @@ class NNApp:
       return
 
     values = self.network.fit(self.test_input_data[test_index])
-    outs = [[neuron.get() for neuron in layer.neurons] for layer in self.network.layers]
-    weights = [[[w*alive for w, alive in zip(neuron.weight, neuron.alive)] for neuron in layer.neurons] for layer in self.network.layers[1:]]
+    outs = ((neuron.get() for neuron in layer.neurons) for layer in self.network.layers)
+    weights = (((w*alive for w, alive in zip(neuron.weight, neuron.alive)) for neuron in layer.neurons) for layer in self.network.layers[1:])
     return (outs, weights, [self.test_input_data[test_index], self.test_target_data[test_index]])
 
 # main

@@ -25,7 +25,7 @@ class Label(tk.Label):
     props = { key: kwargs[key] if key in kwargs.keys() else value for key, value in defaultProps.items() }
 
     fontSize = props['fontSize']
-    frameProps = ['padx', 'pady', 'anchor', 'side', 'fill', 'expand']
+    frameProps = ('padx', 'pady', 'anchor', 'side', 'fill', 'expand')
     frame.pack(**{ key: props[key] for key in frameProps })
     super().__init__(frame, text=text, anchor=props['ianchor'], font=('', fontSize), fg=props['fontColor'], wraplength=width)
     self.config(bg=props['color'])

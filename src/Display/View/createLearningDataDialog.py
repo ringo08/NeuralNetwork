@@ -48,12 +48,12 @@ class CreateLearningDataDialog(Dialog):
   def _buttonbox(self, master):
     props = { 'width': 200, 'side': tk.LEFT, 'anchor': tk.CENTER }
     cancelProps = { **props, 'width': 64 }
-    self.footer = [
+    self.footer = (
       { 'text': 'load learning data', **props, 'command': self.loadLearningData },
       { 'text': 'make learning data', **props, 'command': self.makeLearningData },
       { 'text': 'pattern editor', **props },
       { 'text': 'cancel', **cancelProps, 'command': self.cancel }
-    ]
+    )
     self.actions = ButtonBox(master=master, width=self.width, children=self.footer, padx=32)
     self.actions.buttons['make learning data']['state'] = tk.DISABLED
 
@@ -70,16 +70,16 @@ class CreateLearningDataDialog(Dialog):
     self.inputList.clearItems()
     self.targetList.clearItems()
     for idata in inputData:
-      self.inputList.insert(tk.END, ' '.join([str(d) for d in idata]))
+      self.inputList.insert(tk.END, ' '.join((str(d) for d in idata)))
     for tdata in targetData:
-      self.targetList.insert(tk.END, ' '.join([str(d) for d in tdata]))
+      self.targetList.insert(tk.END, ' '.join((str(d) for d in tdata)))
     self.actions.buttons['make learning data']['state'] = tk.NORMAL
 
   def makeLearningData(self):
     inputData = self.inputList.getItems()
     targetData = self.targetList.getItems()
     data = { 'input': inputData, 'target': targetData } 
-    f = lambda lists: all([len(lists[0].strip().split(' ')) == len(l.strip().split(' ')) for l in lists])
+    f = lambda lists: all((len(lists[0].strip().split(' ')) == len(l.strip().split(' ')) for l in lists))
     if not (f(targetData) and f(inputData)):
       self.master.onError('input or target length are disagreement')
       return

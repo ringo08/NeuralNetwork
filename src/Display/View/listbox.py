@@ -29,7 +29,7 @@ class Listbox(tk.Listbox):
 
     self.pack(fill=tk.BOTH, padx=props['ipadx'], pady=props['ipady'], expand=True)
     # self.pack(fill=tk.BOTH, ipadx=props['ipadx'], ipady=props['ipady'], expand=True)
-    frameProps = ['padx', 'pady', 'anchor', 'side', 'fill', 'expand']
+    frameProps = ('padx', 'pady', 'anchor', 'side', 'fill', 'expand')
     frame.pack(**{ key: props[key] for key in frameProps })
 
   def getItems(self):

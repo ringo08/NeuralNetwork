@@ -32,7 +32,7 @@ class ColorBar(Frame):
     frame2 = Frame(self, width=1, height=1)
     frame2.pack(expand=True)
     
-    frameProps = ['padx', 'pady', 'anchor', 'side', 'fill', 'expand']
+    frameProps = ('padx', 'pady', 'anchor', 'side', 'fill', 'expand')
     self.pack(**{ key: props[key] for key in frameProps })
     
   

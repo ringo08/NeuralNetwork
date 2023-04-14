@@ -40,7 +40,7 @@ class Entry(tk.Entry):
     if defaultValue:
       self.insert(0, defaultValue)
     self.pack(fill=tk.BOTH, padx=props['ipadx'], pady=props['ipady'], expand=True)
-    frameProps = ['padx', 'pady', 'anchor', 'side', 'fill', 'expand']
+    frameProps = ('padx', 'pady', 'anchor', 'side', 'fill', 'expand')
     frame.pack(**{ key: props[key] for key in frameProps })
   
   def set(self, text):
@@ -51,9 +51,9 @@ class Entry(tk.Entry):
     self.delete(0, tk.END)
 
   def multipleCallback(master, string):
-    f = lambda x: True if str.isdigit(x) or x in [' '] else False
-    return all([f(s) for s in string])
+    f = lambda x: True if str.isdigit(x) or x in (' ') else False
+    return all((f(s) for s in string))
 
   def callback(master, string):
     f = lambda x: True if str.isdigit(x) else False
-    return (master.bindText in string) and all([f(s) for s in string[len(master.bindText):]])
+    return (master.bindText in string) and all((f(s) for s in string[len(master.bindText):]))

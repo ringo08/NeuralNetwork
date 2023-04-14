@@ -16,10 +16,10 @@ class Graph(Frame):
     self.minimum = math.log10(0.1)
     self.data = []
     self.maxPoint = 0
-    self.ytickPoints = []
-    self.ytickLabels = []
-    self.xtickPoints = []
-    self.xtickLabels = []
+    self.ytickPoints = ()
+    self.ytickLabels = ()
+    self.xtickPoints = ()
+    self.xtickLabels = ()
     self.progress = None
     self._init_graph()
     self.graph_plot()
@@ -95,18 +95,18 @@ class Graph(Frame):
     self.xtickPoints = self._create_ticks_points(self.xtickCanvas, ticks=xtick.values(), oriental='x')
     self.xtickLabels = self._create_tick_labels(self.xtickCanvas, labels=list(xtick.keys()), ticks=xtick.values(), oriental='x')
 
-  def _create_tick_labels(self, canvas, labels=[], ticks=[], tickPad=4, oriental='x'):
+  def _create_tick_labels(self, canvas, labels=(), ticks=(), tickPad=4, oriental='x'):
     if oriental == 'x':
-      labels = [canvas.create_text(tick, tickPad, text=int(labels[i]), anchor=tk.N, font=('', 10)) for i, tick in enumerate(ticks)]
+      labels = (canvas.create_text(tick, tickPad, text=int(labels[i]), anchor=tk.N, font=('', 10)) for i, tick in enumerate(ticks))
     elif oriental == 'y':
-      labels = [canvas.create_text(tickPad, tick+tickPad, text=int(labels[i]), anchor=tk.W, font=('', 10)) for i, tick in enumerate(ticks)]
+      labels = (canvas.create_text(tickPad, tick+tickPad, text=int(labels[i]), anchor=tk.W, font=('', 10)) for i, tick in enumerate(ticks))
 
     return labels
 
-  def _create_ticks_points(self, canvas, ticks=[], tickLen=4, oriental='x'):
+  def _create_ticks_points(self, canvas, ticks=(), tickLen=4, oriental='x'):
     if oriental == 'x':
-      points = [(tick, 0, tick, tickLen) for tick in ticks]
+      points = ((tick, 0, tick, tickLen) for tick in ticks)
     elif oriental == 'y':
-      points = [(self.tickSize-tickLen, tick, self.tickSize, tick) for tick in ticks]
+      points = ((self.tickSize-tickLen, tick, self.tickSize, tick) for tick in ticks)
 
-    return [canvas.create_line(*point) for point in points]
+    return (canvas.create_line(*point) for point in points)

@@ -49,7 +49,7 @@ class Controller:
     networkData = self.openNetworkSettingDialog().result
     if not networkData:
       return
-    layers = ['input', 'hidden', 'output']
+    layers = ('input', 'hidden', 'output')
     if 'input' in networkData:
       result = self.model.newCreateNetwork(**{f'{layer}_num': int(networkData[layer]) for layer in layers})
     else:
@@ -81,7 +81,7 @@ class Controller:
         return
     self.master.destroy()
 
-  def openNetworkDialog(self, defaultLayer=[2, 2, 1]):
+  def openNetworkDialog(self, defaultLayer=(2, 2, 1)):
     if self.networkDialog and self.networkDialog.winfo_exists():
       self.networkDialog.destroy()
     self.networkDialog = tk.Toplevel(self.master)
@@ -100,7 +100,7 @@ class Controller:
   def openParamDialog(self, tagName, onCut):
     if tagName is None:
       return
-    params = [int(tag.split(':')[1]) for tag in tagName.split('-')[1:]]
+    params = (int(tag.split(':')[1]) for tag in tagName.split('-')[1:])
     value = self.model.getParam(*params)
     if value is None:
       return
@@ -191,7 +191,7 @@ class Controller:
     )
   
   def getFilePathDialog(self, title, isDir=False, isSave=False):
-    types = [('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat')]
+    types = (('CSVファイル', '*.csv'), ('テキストファイル','*.txt'), ('DATAファイル', '*.dat'))
     if isSave:
       return filedialog.asksaveasfilename(title='Save As', initialdir=self.model.referencePath, filetypes='' if isDir else types)
     if isDir:

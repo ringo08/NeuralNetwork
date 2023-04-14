@@ -24,10 +24,10 @@ defaultButtonProps = {
 }
 
 class ButtonBox(Frame):
-  def __init__(self, master, width=64, height=64, children=[], **kwargs):
+  def __init__(self, master, width=64, height=64, children=(), **kwargs):
     props = { key: kwargs[key] if key in kwargs.keys() else value for key, value in defaultProps.items() }
     super().__init__(master=master, width=width, height=height, color=props['color'])
-    children = children if children else [{ 'text': 'ok' }, { 'text': 'cancel' }]
+    children = children if children else ({ 'text': 'ok' }, { 'text': 'cancel' })
 
     self.buttons = {}
 
@@ -35,6 +35,6 @@ class ButtonBox(Frame):
       buttonProps = { key: child[key] if key in child.keys() else value for key, value in defaultButtonProps.items() }
       self.buttons[buttonProps['text']] = Button(self, **buttonProps)
 
-    frameProps = ['padx', 'pady', 'anchor', 'side', 'fill']
+    frameProps = ('padx', 'pady', 'anchor', 'side', 'fill')
     self.pack(**{ key: props[key] for key in frameProps })
     

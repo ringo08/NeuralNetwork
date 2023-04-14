@@ -26,8 +26,8 @@ class Dialog(simpledialog.Dialog):
     if func:
       func(self.rootLayout)
     else:
-      buttons = [
+      buttons = (
         { 'text': 'ok', 'command': self.ok },
         { 'text': 'cancel', 'command': self.cancel }
-      ]
+      )
       self.actions = ButtonBox(self.rootLayout, width=self.width, height=self.footerHeight, children=buttons)

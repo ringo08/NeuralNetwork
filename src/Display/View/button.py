@@ -28,7 +28,7 @@ class Button(tk.Button):
     self.config(background=props['color'])
     self.pack(fill=tk.BOTH, ipadx=props['ipadx'], ipady=props['ipady'])
 
-    frameProps = ['padx', 'pady', 'anchor', 'side', 'fill', 'expand']
+    frameProps = ('padx', 'pady', 'anchor', 'side', 'fill', 'expand')
     frame.pack(**{ key: props[key] for key in frameProps })
   
   def setLabel(self, text):
