@@ -5,7 +5,7 @@ from config.settingConfig import configWrite, configUpdate
 from configparser import ConfigParser, ExtendedInterpolation
 
 class Application(tk.Frame):
-  def __init__(self, master, config):
+  def __init__(self, master: tk.Tk, config: ConfigParser):
     super().__init__(master)
     master.title("NNApp")
     master.geometry('240x560')

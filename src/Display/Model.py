@@ -3,6 +3,7 @@ from src.NNApp import NNApp
 from . import Messages
 from multiprocessing import Process
 from config.settingConfig import configUpdate
+from configparser import ConfigParser
 
 def is_num(s):
   try:
@@ -13,7 +14,7 @@ def is_num(s):
     return True
 
 class Model:
-  def __init__(self, config, onError=None):
+  def __init__(self, config: ConfigParser, onError=None):
     self.config = config
     self.onError = onError
     self.NNApp = NNApp(config)
@@ -24,8 +25,8 @@ class Model:
     self.inputSize = 1
     self.colorRange = 2
     self.isSaved = True
-    self.learningDataPath = ''
-    self.testDataPath = ''
+    self.learningDataPath: str = ''
+    self.testDataPath: str = ''
     self.basePath = self.config['Paths']['data']
     self.referencePath = self.config['Paths']['reference']
     self.network = ()
@@ -48,15 +49,15 @@ class Model:
       self.process.terminate()
       self.process = None
 
-  def _read_file(self, path):
-    if not os.path.isfile(path):
+  def _read_file(self, fpath: str) -> list[str]:
+    if not os.path.isfile(fpath):
       self.onError('Not exist file')
       return
-    with open(path, 'rt', encoding='utf-8') as f:
+    with open(fpath, 'rt', encoding='utf-8') as f:
       text = f.readlines()
     return text
 
-  def _output_file(self, fpath, string, write_type='at'):
+  def _output_file(self, fpath: str, string: str, write_type='at'):
     with open(fpath, write_type, encoding='utf-8') as file:
       print(string, file=file)
 
@@ -70,7 +71,7 @@ class Model:
     if not os.path.isdir(self.basePath):
       os.mkdir(self.basePath)
 
-  def saveNetwork(self, toPath):
+  def saveNetwork(self, toPath: str):
     if toPath and os.path.isdir(self.basePath):
       try:
         shutil.copytree(self.basePath, toPath, dirs_exist_ok=True)
@@ -78,14 +79,14 @@ class Model:
       except Exception as e:
         self.onError(e)
 
-  def copyNetwork(self, fromPath):
+  def copyNetwork(self, fromPath: str):
     if fromPath and os.path.isdir(fromPath):
       try:
         shutil.copytree(fromPath, self.basePath, dirs_exist_ok=True)
       except Exception as e:
         self.onError(e)
 
-  def readNetworkFile(self, fileIndex=None, isInit=False):
+  def readNetworkFile(self, fileIndex: int=None, isInit=False):
     fpath = self.dataPath['construction'] if isInit else self.dataPath['parameter']
     getIndex = fileIndex if fileIndex != None else -2
     getParamIndex = getIndex+3 if getIndex >= 0 else getIndex
@@ -114,7 +115,7 @@ class Model:
     self.biases = tuple(biases)
     return self.all_w, self.biases
 
-  def overwriteNetwork(self, toPath=''):
+  def overwriteNetwork(self, toPath: str=''):
     if not (toPath and os.path.isdir(self.basePath)):
       return
     try:
@@ -141,7 +142,7 @@ class Model:
     return self.network
 
   # Create network from file
-  def fromFileCreateNetwork(self, fromPath):
+  def fromFileCreateNetwork(self, fromPath: str):
     if not (fromPath and os.path.isdir(fromPath)):
       self.onError('not found directory path')
     self.copyNetwork(fromPath)
@@ -155,7 +156,7 @@ class Model:
 
 # Create Learning Data
   # Make learning data
-  def makeLearningDataFile(self, fpath, data: dict):
+  def makeLearningDataFile(self, fpath: str, data: dict):
     learningColumns = ('input', 'target')
     if not any((k in data.keys() for k in learningColumns)):
       print('not found items')

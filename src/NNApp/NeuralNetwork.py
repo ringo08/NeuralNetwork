@@ -1,29 +1,22 @@
+from __future__ import annotations
 import math, random
 from .NetworkParam import K, H, weightRange as wRange
 from .functions import NguyenWidrow
 
-def is_num(s):
-  try:
-    float(s)
-  except ValueError:
-    return False
-  else:
-    return True
-
-def sigmoid(x: float):
+def sigmoid(x: float) -> float:
   return 1 / (1 + math.exp(-(K*x)))
 
-def relu(x: float):
+def relu(x: float) -> float:
   return x * (x > 0.0)
 
-def derivative(f, x, h):
+def derivative(f: function, x: float, h: float) -> float:
   return (f(x+h) - f(x)) / h
 
-def mean(x:list):
+def mean(x:list) -> float:
   return sum(x)/len(x)
 
 class Neuron:
-  def __init__(self, init_weight=None, init_bias=None, func=None):
+  def __init__(self, init_weight: list[float]=None, init_bias: float=None, func=None):
     self.dendrite = 0.0
     self.axon = 0.0
     self.weight = init_weight
@@ -32,60 +25,60 @@ class Neuron:
       self.alive = [1 if bool(w) else 0 for w in init_weight]
     self.h = func if func else sigmoid
 
-  def set_weight(self, weight):
-    self.weight = weight
+  def set_params(self, weight: list[float]=None, bias: float=None):
+    if weight is not None:
+      self.weight = weight
+    if bias is not None:
+      self.bias = bias
 
-  def set_bias(self, bias):
-    self.bias = bias
-
-  def set_value(self, value):
+  def init_status(self, value: float):
     self.dendrite = value
     self.axon = value
   
-  def add(self, values: list):
+  def add(self, values: list[float]):
     self.dendrite = self.bias
     self.dendrite += sum((v*w*alive for v, w, alive in zip(values, self.weight, self.alive)))
     self.axon = self.h(self.dendrite)
 
-  def get(self):
+  def get(self) -> float:
     return self.axon
 
-  def cut(self, index):
+  def cut(self, index: int):
     self.alive[index] = 0
 
 class Layer:
-  def __init__(self, weights=[], biases=[], num=0, is_input=False):
+  def __init__(self, weights: list[list[float]]=[], biases: list[float]=[], num=0, is_input=False):
     self.num = num if num > 0 else len(weights)
     if is_input:
       self.neurons = tuple([Neuron() for _ in range(self.num)])
     else:
       self.neurons = tuple([Neuron(init_weight=weights[i], init_bias=biases[i]) for i in range(self.num)])
 
-  def update_attribute(self, weights, biases):
-    for i, neuron in enumerate(self.neurons):
-      neuron.set_weight(weights[i])
-      neuron.set_bias(biases[i])
+  def update_attribute(self, weights: list[list[float]], biases: list[float]):
+    for neuron, weight, bias in zip(self.neurons, weights, biases):
+      neuron.set_params(weight=weight, bias=bias)
 
-  def set_values(self, input_value):
-    for i, neuron in enumerate(self.neurons):
-      neuron.set_value(input_value[i])
+  def set_values(self, input_values):
+    for neuron, value in zip(self.neurons, input_values):
+      neuron.init_status(value)
 
-  def get_values(self):
+  def get_values(self) -> tuple[float]:
     return tuple([neuron.get() for neuron in self.neurons])
 
-  def forward(self, next_layer):
+  def forward(self, next_layer: Layer):
     for nn in next_layer.neurons:
       nn.add(self.get_values())
 
-  def backward(self, frontLayer, errors, n, h):
-    new_errors = []
-    weights = tuple([[] for _ in range(self.num)])
-    biases = []
+  def backward(self, frontLayer: Layer, errors: list[float], n: float, h: float) -> \
+    tuple[tuple[list[float]], tuple[float], tuple[float]]:
+
+    new_errors: list[float] = []
+    biases: list[float] = []
+    weights: tuple[list[float]] = tuple([[] for _ in range(self.num)])
     for sn in range(self.num):
       neuron = self.neurons[sn]
       diff = derivative(neuron.h, neuron.dendrite, h)
-      error = errors[sn]
-      back = error*diff
+      back = errors[sn]*diff
       biases.append(neuron.bias - n*back)
       new_errors.append(back)
       for fn in range(frontLayer.num):
@@ -95,47 +88,45 @@ class Layer:
 
 
 class Network:
-  def __init__(self, input_num=2, hidden_num=2, output_num=1, weights=[], biases=[]):
+  def __init__(self, input_num=2, hidden_num=2, output_num=1, weights: list[list[list[float]]]=[], biases: list[list[float]]=[]):
     self.input_num = input_num
     self.hidden_num = hidden_num
     self.output_num = output_num
-    self.all_w = weights
-    self.biases = biases
     self.score = None
-    if (not self.all_w) and (not self.biases):
-      # self._init_net()
-      self._init_net_with_nguyen_widrow()
+    if (not weights) and (not biases):
+      self._init_net()
+      # self._init_net_with_nguyen_widrow()
 
     self.layers = [Layer(num=self.input_num, is_input=True)]
-    for i in range(len(self.all_w)):
-      self.layers.append(Layer(weights=self.all_w[i], biases=self.biases[i]))
+    for weight, bias in zip(weights, biases):
+      self.layers.append(Layer(weights=weight, biases=bias))
 
   def _init_net(self, place=False):
-    self.all_w = [
+    weights = [
       self._init_weight(self.input_num, self.hidden_num),
       self._init_weight(self.hidden_num, self.output_num)
     ]
-    self.biases = self._init_weight(self.hidden_num, 1)
-    self.biases.extend(self._init_weight(self.output_num, 1))
+    biases = self._init_weight(self.hidden_num, 1)
+    biases.extend(self._init_weight(self.output_num, 1))
 
     if place:
-      for i, layer in enumerate(self.layers[:0:-1]):
-        layer.update_attribute(self.all_w[i], self.biases[i])
+      for layer, weight, bias in zip(self.layers[:0:-1], weights, biases):
+        layer.update_attribute(weight, bias)
 
   def _init_net_with_nguyen_widrow(self, place=False):
     hidden_w, hidden_b = NguyenWidrow(self.input_num, self.hidden_num)
     output_w, output_b = NguyenWidrow(self.hidden_num, self.output_num)
-    self.all_w = [hidden_w, output_w]
-    self.biases = [hidden_b, output_b]
+    weights = [hidden_w, output_w]
+    biases = [hidden_b, output_b]
 
     if place:
-      for i, layer in enumerate(self.layers[:0:-1]):
-        layer.update_attribute(self.all_w[i], self.biases[i])
+      for layer, weight, bias in zip(self.layers[:0:-1], weights, biases):
+        layer.update_attribute(weight, bias)
 
-  def _init_weight(self, in_num, out_num, wRange=1):
+  def _init_weight(self, in_num: int, out_num: int, wRange=1):
     return [[random.uniform(-wRange, wRange) for _ in range(in_num)] for _ in range(out_num)]
 
-  def learning(self, input_values, targets, n=0.99):
+  def learning(self, input_values: list[list[float]], targets: list[list[float]], n=0.99):
     NNUM = len(self.layers)
     score = []
     for index, input_layer in enumerate(input_values):
@@ -147,7 +138,7 @@ class Network:
 
       # calc error and score
       out_values = self.layers[-1].get_values()
-      errors = [-(target[i]-out_values[i]) for i in range(len(target))]
+      errors = [-(t-value[i]) for t, value in zip(target, out_values)]
       score.append(sum([(1/len(errors))*(e**2) for e in errors]))
 
       new_weights = []
@@ -164,7 +155,7 @@ class Network:
         errors = newError
 
       # update weight
-      [layer.update_attribute(new_weights[i], new_biases[i]) for i, layer in enumerate(self.layers[:0:-1])]
+      [layer.update_attribute(weight, bias) for layer, weight, bias in zip(self.layers[:0:-1], new_weights, new_biases)]
     return score
   
   def fit(self, test_values):
@@ -172,28 +163,3 @@ class Network:
     for i, n in enumerate(self.layers[:-1]):
       n.forward(self.layers[i+1])
     return self.layers[-1].get_values()
-
-
-if __name__ == '__main__':
-  input_num, hidden_num, output_num = (2, 2, 1)
-  net = Network(input_num=input_num, hidden_num=hidden_num, output_num=output_num)
-
-  learning_data = [[0, 0], [0, 1], [1, 0], [1, 1]]
-  target_data = [[0], [1], [1], [0]]
-  score = net.learning(learning_data, target_data, error=1e-5)[1:]
-
-  player = ''
-  while True:
-    player = input('input int array >>> ')
-    if player == 'q':
-      exit()
-    input_strings = [s.strip() for s in player.split(',')]
-    if not all([is_num(s) for s in input_strings]):
-      print('invalid value')
-      continue
-    if net.input_num != len(input_strings):
-      print('invalid length')
-      continue
-    test_values = [int(v) for v in input_strings]
-    out_values = net.fit(test_values)
-    print(out_values)

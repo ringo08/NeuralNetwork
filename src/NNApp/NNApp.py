@@ -1,7 +1,8 @@
 import os, gc
 from .NeuralNetwork import Network
+from configparser import ConfigParser
 
-def is_num(s):
+def is_num(s: float) -> bool:
   try:
     float(s)
   except ValueError:
@@ -9,11 +10,11 @@ def is_num(s):
   else:
     return True
 
-def mean(x:list):
+def mean(x:list[float]) -> float:
   return sum(x)/len(x)
 
 class NNApp:
-  def __init__(self, config):
+  def __init__(self, config: ConfigParser):
     self.config = config
     self.base_path = self.config['Paths']['data']
     self.data_path = {key: self.config['Paths'][key] for key in self.config['Datas']}
@@ -21,7 +22,7 @@ class NNApp:
     self.operate_path = self.config['Paths']['operation']
     self.network = None
 
-  def _read_learning_data(self, fpath):
+  def _read_learning_data(self, fpath: str):
     learning_data = []
     target_data = []
     with open(fpath, 'rt', encoding='utf-8') as file:
@@ -34,12 +35,12 @@ class NNApp:
       target_data.append([float(text.strip()) for text in texts[learning_num:]])
     return learning_data, target_data
 
-  def _read_setting_file(self, fpath):
+  def _read_setting_file(self, fpath: str):
     with open(fpath, 'rt', encoding='utf-8') as file:
       contents = file.readlines()
     return tuple([float(column.strip()) for column in contents[-1].split(',') if is_num(column.strip())])
 
-  def _read_net_file(self, fpath):
+  def _read_net_file(self, fpath: str):
     with open(fpath, 'rt', encoding='utf-8') as file:
       text = file.readlines()
     self.input_num, self.hidden_num, self.output_num = tuple([int(s.strip()) for s in text[1].split(',')])
@@ -63,7 +64,7 @@ class NNApp:
     self.all_w = tuple(all_w)
     self.biases = tuple(biases)
   
-  def _is_read_operation_file(self, key='stop'):
+  def _is_read_operation_file(self, key='stop') -> bool:
     with open(self.config['Paths']['operation'], 'rt', encoding='utf-8') as f:
       lines = f.readline()
     return self.config['Operate'][key] == lines.strip()
@@ -74,12 +75,12 @@ class NNApp:
     with open(self.config['Paths']['operation'], 'wt', encoding='utf-8') as f:
       print(self.config['Operate'][key], file=f)
 
-  def _output_file(self, fpath, string, write_type='at'):
+  def _output_file(self, fpath: str, string: str, write_type='at'):
     with open(fpath, write_type, encoding='utf-8') as f:
       print(string, file=f)
 
   def createHeader(self, input_num=2, hidden_num=2, output_num=1):
-    fpaths = (self.data_path[key] for key in ('construction', 'parameter'))
+    fpaths = (self.data_path[key] for key in ['construction', 'parameter'])
     for fpath in fpaths:
       self._output_file(fpath, "input_num, hidden_num, output_num", write_type='wt')
       self._output_file(fpath, f"{input_num}, {hidden_num}, {output_num}")
@@ -93,7 +94,7 @@ class NNApp:
     f = lambda nums: ','.join([str(i) for i in range(nums)])
     self._output_file(fpath, f"loss, test_index, {','.join([f'{key}({f(value)})' for key, value in numdict.items()])}") 
 
-  def _print_bw(self, text, front_num, back_num=1):
+  def _print_bw(self, text: str, front_num: int, back_num=1):
     array = tuple([f'{text}{b+1}-b' if f == 0 else f'{text}{b+1}-w{f}' for f in range(front_num+1) for b in range(back_num)])
     return ','.join(array)
 
@@ -102,7 +103,7 @@ class NNApp:
     gc.collect()
     self.network = None
 
-  def cut_combining(self, layer_index, neuron_index, w_index):
+  def cut_combining(self, layer_index: int, neuron_index: int, w_index: int):
     if not (
       1 <= layer_index < len(self.network.layers)
       and 0 <= neuron_index < len(self.network.layers[layer_index].neurons)
@@ -116,7 +117,7 @@ class NNApp:
     self.output_layer_out(self.data_path['output'], index=0)
     return True
 
-  def createNetwork(self, readFile=None, out=False):
+  def createNetwork(self, readFile: str=None, out=False):
     if self.network:
       self.clearNetwork()
     fpath = readFile if readFile else self.data_path['construction']
@@ -129,7 +130,7 @@ class NNApp:
       self.output_layer_out(self.data_path['output'], index=0)
     return tuple([self.input_num, self.hidden_num, self.output_num])
 
-  def output_network(self, outFile, sep=','):
+  def output_network(self, outFile: str, sep=','):
     if not self.network:
       return
     string = sep.join([
@@ -142,7 +143,7 @@ class NNApp:
     with open(outFile, 'at', encoding='utf-8') as f:
       print(string, file=f)
 
-  def output_layer_out(self, outFile, index=0, score=None, sep=','):
+  def output_layer_out(self, outFile: str, index=0, score: float=None, sep=','):
     if not self.network:
       return
     string = '{:.3e}'.format(score) if score != None else ''
@@ -208,11 +209,11 @@ class NNApp:
 
     return answer
 
-  def setTestData(self, fpath):
+  def setTestData(self, fpath: str):
     self.test_input_data, self.test_target_data = self._read_learning_data(fpath)
     return len(self.test_input_data)
 
-  def test(self, test_index, sep=','):
+  def test(self, test_index: int, sep=','):
     if not (self.test_input_data and self.test_target_data):
       return
     if not 0 <= test_index < len(self.test_target_data):
