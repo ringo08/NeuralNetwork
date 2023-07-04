@@ -1,5 +1,5 @@
 import os, shutil
-from ..NNApp import NNApp
+from src.NNApp import NNApp
 from . import Messages
 from multiprocessing import Process
 from config.settingConfig import configUpdate
@@ -18,7 +18,7 @@ class Model:
     self.onError = onError
     self.NNApp = NNApp(config)
     self.process = None
-    self.layerNums = []
+    self.layerNums = ()
     self.loadIndexMemory = 0
     self.testMaxIndex = 0
     self.inputSize = 1
@@ -28,7 +28,7 @@ class Model:
     self.testDataPath = ''
     self.basePath = self.config['Paths']['data']
     self.referencePath = self.config['Paths']['reference']
-    self.network = []
+    self.network = ()
     self.dataPath = { key: self.config['Paths'][key] for key in self.config['Datas'] }
     self.messages = Messages.Messages(config)
     self.menuColumns = (
@@ -43,7 +43,7 @@ class Model:
     )
     self.sep = ','
 
-  def __del__(self):
+  def close(self):
     if self.process:
       self.process.terminate()
       self.process = None
@@ -108,10 +108,10 @@ class Model:
         bias.append(flat_array[0])
         weight.append(flat_array[1:self.layerNums[i]+1])
         flat_array = flat_array[self.layerNums[i]+1:]
-      biases.append(bias)
-      all_w.append(weight)
-    self.all_w = all_w
-    self.biases = biases
+      biases.append(tuple(bias))
+      all_w.append(tuple(weight))
+    self.all_w = tuple(all_w)
+    self.biases = tuple(biases)
     return self.all_w, self.biases
 
   def overwriteNetwork(self, toPath=''):
@@ -308,10 +308,8 @@ class Model:
     self.testMaxIndex = self.NNApp.setTestData(fpath)
 
   def startTest(self):
-    self.testAnswers = []
     self.NNApp.createNetwork(readFile=self.dataPath['parameter'], out=False)
-    for i in range(self.testMaxIndex):
-      self.testAnswers.append(self.NNApp.test(i))
+    self.testAnswers = tuple([self.NNApp.test(i) for i in range(self.testMaxIndex)])
     return len(self.testAnswers)
 
   def getTestAnswerByIndex(self, index):

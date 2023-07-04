@@ -26,7 +26,7 @@ class Application(tk.Frame):
   def onError(self, text):
     tk.messagebox.showwarning('Error', text)
 
-def main():
+def app():
   config = ConfigParser(interpolation=ExtendedInterpolation())
   path_root = os.path.dirname(os.path.abspath(__file__))
   path_config = os.path.join(path_root, 'config', 'config.ini')
@@ -41,4 +41,4 @@ def main():
   myapp.mainloop()
 
 if '__main__' in __name__:
-  main()
+  app()
