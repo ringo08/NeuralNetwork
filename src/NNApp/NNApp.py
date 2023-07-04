@@ -1,5 +1,4 @@
-import sys, os, gc
-sys.path.append('.')
+import os, gc
 from .NeuralNetwork import Network
 
 def is_num(s):
@@ -59,10 +58,10 @@ class NNApp:
         bias.append(flat_array[0])
         weight.append(flat_array[1:nums[i]+1])
         flat_array = flat_array[nums[i]+1:]
-      biases.append(bias)
-      all_w.append(weight)
-    self.all_w = all_w
-    self.biases = biases
+      biases.append(tuple(bias))
+      all_w.append(tuple(weight))
+    self.all_w = tuple(all_w)
+    self.biases = tuple(biases)
   
   def _is_read_operation_file(self, key='stop'):
     with open(self.config['Paths']['operation'], 'rt', encoding='utf-8') as f:

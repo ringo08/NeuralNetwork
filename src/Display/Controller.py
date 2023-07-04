@@ -22,6 +22,7 @@ class Controller:
     self.networkDialog = None
     self.trainDialog = None
     self.testDialog = None
+    self.master.protocol("WM_DELETE_WINDOW", self.quit)
     self.bind_UI()
 
   def bind_UI(self):
@@ -59,7 +60,7 @@ class Controller:
 
     if self.model.isExistNetwork():
       self.menu.changeMenuMode(True)
-    self.model.layerNums = list(result)
+    self.model.layerNums = tuple(result)
     self.openNetworkDialog(result)
 
   def openReviewNetwork(self):
@@ -80,7 +81,7 @@ class Controller:
     if not self.model.isSaved:
       if tk.messagebox.askyesno('config', 'quit before save?'):
         return
-    self.model.__del__()
+    self.model.close()
     self.master.destroy()
 
   def openNetworkDialog(self, defaultLayer=(2, 2, 1)):

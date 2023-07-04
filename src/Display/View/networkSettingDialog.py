@@ -23,7 +23,8 @@ class NetworkSettingDialog(Dialog):
     layerFieldFrame.pack(fill=tk.BOTH, pady=16, padx=32, expand=True)
   
     self.inputEntry = StyledTextField(master=layerFieldFrame, width=64, defaultValue='2', text='input layer')
-    self.hiddenEntry = StyledTextField(master=layerFieldFrame, width=64, defaultValue='2', text='hidden layer', multiple=True)
+    # enable multiple setting for hidden layer
+    self.hiddenEntry = StyledTextField(master=layerFieldFrame, width=64, defaultValue='2', text='hidden layer', multiple=False)
     self.outputEntry = StyledTextField(master=layerFieldFrame, width=64, defaultValue='1', text='output layer')
 
   def _buttonbox(self, master):
@@ -53,7 +54,7 @@ class NetworkSettingDialog(Dialog):
     self.result = None
     if self.pathLabel:
       self.result = self.pathLabel
-    elif all((v for v in layers.values())):
+    elif all((bool(v) and v != '0' for v in layers.values())):
       self.result = layers
 
 class StyledTextField(Entry):

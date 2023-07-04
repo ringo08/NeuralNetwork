@@ -1,5 +1,6 @@
 import math, random
-from .NetworkParam import h, K, weightRange as wRange
+from .NetworkParam import K, H, weightRange as wRange
+from .functions import NguyenWidrow
 
 def is_num(s):
   try:
@@ -15,7 +16,7 @@ def sigmoid(x: float):
 def relu(x: float):
   return x * (x > 0.0)
 
-def derivative(f, x):
+def derivative(f, x, h):
   return (f(x+h) - f(x)) / h
 
 def mean(x:list):
@@ -76,13 +77,13 @@ class Layer:
     for nn in next_layer.neurons:
       nn.add(self.get_values())
 
-  def backward(self, frontLayer, errors, n):
+  def backward(self, frontLayer, errors, n, h):
     new_errors = []
     weights = tuple([[] for _ in range(self.num)])
     biases = []
     for sn in range(self.num):
       neuron = self.neurons[sn]
-      diff = derivative(neuron.h, neuron.dendrite)
+      diff = derivative(neuron.h, neuron.dendrite, h)
       error = errors[sn]
       back = error*diff
       biases.append(neuron.bias - n*back)
@@ -102,24 +103,36 @@ class Network:
     self.biases = biases
     self.score = None
     if (not self.all_w) and (not self.biases):
-      self._init_net()
+      # self._init_net()
+      self._init_net_with_nguyen_widrow()
 
     self.layers = [Layer(num=self.input_num, is_input=True)]
     for i in range(len(self.all_w)):
       self.layers.append(Layer(weights=self.all_w[i], biases=self.biases[i]))
 
   def _init_net(self, place=False):
-    hidden_w = self._init_weight(self.input_num, self.hidden_num)
-    output_w = self._init_weight(self.hidden_num, self.output_num)
-    biases = self._init_weight(self.hidden_num, 1)
-    biases.extend(self._init_weight(self.output_num, 1))
-    self.all_w = [hidden_w, output_w]
-    self.biases = biases
+    self.all_w = [
+      self._init_weight(self.input_num, self.hidden_num),
+      self._init_weight(self.hidden_num, self.output_num)
+    ]
+    self.biases = self._init_weight(self.hidden_num, 1)
+    self.biases.extend(self._init_weight(self.output_num, 1))
+
     if place:
       for i, layer in enumerate(self.layers[:0:-1]):
         layer.update_attribute(self.all_w[i], self.biases[i])
 
-  def _init_weight(self, in_num, out_num):
+  def _init_net_with_nguyen_widrow(self, place=False):
+    hidden_w, hidden_b = NguyenWidrow(self.input_num, self.hidden_num)
+    output_w, output_b = NguyenWidrow(self.hidden_num, self.output_num)
+    self.all_w = [hidden_w, output_w]
+    self.biases = [hidden_b, output_b]
+
+    if place:
+      for i, layer in enumerate(self.layers[:0:-1]):
+        layer.update_attribute(self.all_w[i], self.biases[i])
+
+  def _init_weight(self, in_num, out_num, wRange=1):
     return [[random.uniform(-wRange, wRange) for _ in range(in_num)] for _ in range(out_num)]
 
   def learning(self, input_values, targets, n=0.99):
@@ -141,18 +154,17 @@ class Network:
       new_biases = []
       for i in range(NNUM-1, 0, -1):
         net = self.layers[i]
-        new_w, new_b, errors = net.backward(self.layers[i-1], errors, n=n)
+        new_w, new_b, errors = net.backward(self.layers[i-1], errors, n=n, h=H*score[-1])
         new_weights.append(new_w)
         new_biases.append(new_b)
-
-        newError = []
-        for num in range(len(net.neurons[0].weight)):
-          newError.append(sum([error*net.neurons[en].weight[num] for en, error in enumerate(errors)]))
+        newError = tuple([
+          sum([error*net.neurons[en].weight[num] for en, error in enumerate(errors)])
+          for num in range(len(net.neurons[0].weight))
+        ])
         errors = newError
 
       # update weight
-      for i, layer in enumerate(self.layers[:0:-1]):
-        layer.update_attribute(new_weights[i], new_biases[i])
+      [layer.update_attribute(new_weights[i], new_biases[i]) for i, layer in enumerate(self.layers[:0:-1])]
     return score
   
   def fit(self, test_values):
