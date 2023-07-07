@@ -1,3 +1,3 @@
-H = 0.1
-K = 1
+H = 0.01
+K = 3
 weightRange = 1

@@ -29,8 +29,8 @@ class DialogFrame(tk.Frame):
     if func:
       func(self.rootLayout)
     else:
-      buttons = (
+      buttons = tuple([
         { 'text': 'ok' },
         { 'text': 'cancel', 'command': self.cancel }
-      )
+      ])
       self.actions = ButtonBox(self.rootLayout, width=self.width, height=self.footerHeight, children=buttons)

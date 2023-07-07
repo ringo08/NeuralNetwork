@@ -28,11 +28,11 @@ class NetworkSettingDialog(Dialog):
     self.outputEntry = StyledTextField(master=layerFieldFrame, width=64, defaultValue='1', text='output layer')
 
   def _buttonbox(self, master):
-    self.footer = (
+    self.footer = tuple([
       { 'text': 'Create', 'width': 80, 'command': self.onSubmit },
       { 'text': 'Select File', 'width': 80, 'command': self.onSelectFile },
       { 'text': 'Cancel', 'width': 80, 'command': self.onCancel }
-    )
+    ])
     self.actions = ButtonBox(master=master, width=self.width, children=self.footer)
 
   def selectNetwork(self):

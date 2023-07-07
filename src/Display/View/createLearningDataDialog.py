@@ -48,12 +48,12 @@ class CreateLearningDataDialog(Dialog):
   def _buttonbox(self, master):
     props = { 'width': 200, 'side': tk.LEFT, 'anchor': tk.CENTER }
     cancelProps = { **props, 'width': 64 }
-    self.footer = (
+    self.footer = tuple([
       { 'text': 'load learning data', **props, 'command': self.loadLearningData },
       { 'text': 'make learning data', **props, 'command': self.makeLearningData },
       { 'text': 'pattern editor', **props },
       { 'text': 'cancel', **cancelProps, 'command': self.cancel }
-    )
+    ])
     self.actions = ButtonBox(master=master, width=self.width, children=self.footer, padx=32)
     self.actions.buttons['make learning data']['state'] = tk.DISABLED
 

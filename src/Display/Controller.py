@@ -11,17 +11,18 @@ from .View import (
   ParamDialog,
   ReviewDialog
 )
+from .Model import Model
 import tkinter as tk
 from tkinter import filedialog
 
 class Controller:
-  def __init__(self, master, model):
+  def __init__(self, master: tk.Tk, model):
     self.master = master
-    self.model = model
+    self.model: Model = model
     self.menu = MainMenu(master=master, columns=model.menuColumns)
-    self.networkDialog = None
-    self.trainDialog = None
-    self.testDialog = None
+    self.networkDialog: NetworkDialog = None
+    self.trainDialog: TrainDialog = None
+    self.testDialog: TestDialog = None
     self.master.protocol("WM_DELETE_WINDOW", self.quit)
     self.bind_UI()
 
@@ -88,7 +89,7 @@ class Controller:
     if self.networkDialog and self.networkDialog.winfo_exists():
       self.networkDialog.destroy()
     self.networkDialog = tk.Toplevel(self.master)
-    
+
     setting = self.model.readSettingFile()
     self.NetworkDialog = NetworkDialog(
       master=self.networkDialog,
@@ -103,7 +104,7 @@ class Controller:
   def openParamDialog(self, tagName, onCut):
     if tagName is None:
       return
-    params = tuple([int(tag.split(':')[1]) for tag in tagName.split('-')[1:]])
+    params = tuple(map(lambda tag: int(tag.split(':')[1]), tagName.split('-')[1:]))
     value = self.model.getParam(*params)
     if value is None:
       return
@@ -124,8 +125,6 @@ class Controller:
     return dialog
   
   def onSelectLearningData(self, minimum, fpath):
-    if not self.model.validateLearingData(fpath):
-      return False
     self.model.onSelectLearningDataForTrain(fpath)
     self.NetworkDialog.setMinimumError(minimum)
     return True
@@ -172,7 +171,7 @@ class Controller:
     return TestDialog(
       master=self.testDialog,
       defaultPath=self.model.testDataPath,
-      onLoadData=self.model.readLearningData,
+      onLoadData=self.model.readTestData,
       onStartTest=self.model.startTest,
       getFilePathDialog=self.getFilePathDialog,
       onPutFile=self.model.onPutFile,

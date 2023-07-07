@@ -33,7 +33,7 @@ class ParamDialog(Dialog):
     self.valueLabel.setText('0')
   
   def _buttonbox(self, master):
-    self.footer = (
+    self.footer = tuple([
       { 'text': 'ok', 'command': self.ok }
-    )
+    ])
     self.actions = ButtonBox(master, width=self.width, height=64, children=self.footer, padx=48)

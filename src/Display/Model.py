@@ -1,5 +1,7 @@
 import os, shutil
 from src.NNApp import NNApp
+from src.NNApp.NeuralNetwork import *
+from src.File import File
 from . import Messages
 from multiprocessing import Process
 from config.settingConfig import configUpdate
@@ -17,9 +19,9 @@ class Model:
   def __init__(self, config: ConfigParser, onError=None):
     self.config = config
     self.onError = onError
+    self.file = File(config, onError)
     self.NNApp = NNApp(config)
     self.process = None
-    self.layerNums = ()
     self.loadIndexMemory = 0
     self.testMaxIndex = 0
     self.inputSize = 1
@@ -29,7 +31,7 @@ class Model:
     self.testDataPath: str = ''
     self.basePath = self.config['Paths']['data']
     self.referencePath = self.config['Paths']['reference']
-    self.network = ()
+    self.network: Network = ()
     self.dataPath = { key: self.config['Paths'][key] for key in self.config['Datas'] }
     self.messages = Messages.Messages(config)
     self.menuColumns = (
@@ -49,95 +51,28 @@ class Model:
       self.process.terminate()
       self.process = None
 
-  def _read_file(self, fpath: str) -> list[str]:
-    if not os.path.isfile(fpath):
-      self.onError('Not exist file')
-      return
-    with open(fpath, 'rt', encoding='utf-8') as f:
-      text = f.readlines()
-    return text
-
-  def _output_file(self, fpath: str, string: str, write_type='at'):
-    with open(fpath, write_type, encoding='utf-8') as file:
-      print(string, file=file)
-
-  def _print_bw(self, text, front_num, back_num=1):
-    array = tuple([tuple([f'{text}{b+1}-b' if f == 0 else f'{text}{b+1}-w{f}' for f in range(front_num+1)]) for b in range(back_num)])
-    return ','.join(array)
-  
-  def _makeBaseDir(self):
-    if os.path.isdir(self.basePath):
-      shutil.rmtree(self.basePath)
-    if not os.path.isdir(self.basePath):
-      os.mkdir(self.basePath)
-
   def saveNetwork(self, toPath: str):
-    if toPath and os.path.isdir(self.basePath):
-      try:
-        shutil.copytree(self.basePath, toPath, dirs_exist_ok=True)
-        self.isSaved = True
-      except Exception as e:
-        self.onError(e)
-
-  def copyNetwork(self, fromPath: str):
-    if fromPath and os.path.isdir(fromPath):
-      try:
-        shutil.copytree(fromPath, self.basePath, dirs_exist_ok=True)
-      except Exception as e:
-        self.onError(e)
-
-  def readNetworkFile(self, fileIndex: int=None, isInit=False):
-    fpath = self.dataPath['construction'] if isInit else self.dataPath['parameter']
-    getIndex = fileIndex if fileIndex != None else -2
-    getParamIndex = getIndex+3 if getIndex >= 0 else getIndex
-    with open(fpath, 'rt', encoding='utf-8') as file:
-      lines = file.readlines()
-    if len(lines) == self.loadIndexMemory and not isInit:
-      return self.all_w, self.biases
-    self.loadIndexMemory = len(lines)
-    self.all_w = None
-    self.biases = None
-    flat_array = tuple([float(s.strip()) if is_num(s.strip()) else 0 for s in lines[getParamIndex].split(',')])
-    if all((not bool(s) for s in flat_array)):
-      return
-    biases = []
-    all_w = []
-    for i in range(len(self.layerNums[:-1])):
-      bias = []
-      weight = []
-      for _ in range(self.layerNums[i+1]):
-        bias.append(flat_array[0])
-        weight.append(flat_array[1:self.layerNums[i]+1])
-        flat_array = flat_array[self.layerNums[i]+1:]
-      biases.append(tuple(bias))
-      all_w.append(tuple(weight))
-    self.all_w = tuple(all_w)
-    self.biases = tuple(biases)
-    return self.all_w, self.biases
+    isSaved = self.file.save_network(toPath)
+    if isSaved:
+      self.isSaved = True
 
   def overwriteNetwork(self, toPath: str=''):
-    if not (toPath and os.path.isdir(self.basePath)):
-      return
-    try:
-      self.saveNetwork(toPath)
-      self._makeBaseDir()
-    except Exception as e:
-      self.onError(e)
+    return self.file.overwrite_network(toPath)
 
 # Create Network
   def createNetwork(self, out=False):
     if self.process:
       self.process.terminate()
       self.process = None
-    self.writeOperation('init')
-    self.network = self.NNApp.createNetwork(out=out)
+    self.file.write_operation('init')
+    self.network = self.NNApp.create_network(out=out)
     self.isSaved = False
 
   # Create network new
   def newCreateNetwork(self, input_num=2, hidden_num=2, output_num=1):
-    self._makeBaseDir()
-    self.NNApp.createHeader(input_num, hidden_num, output_num)
-    self.NNApp.createOutputHeader(input_num, hidden_num, output_num)
+    self.file.make_network_folder()
+    self.file.create_header(input_num, hidden_num, output_num)
+    self.file.create_outputfile_header(input_num, hidden_num, output_num)
     self.createNetwork(True)
     return self.network
 
@@ -145,10 +80,10 @@ class Model:
   def fromFileCreateNetwork(self, fromPath: str):
     if not (fromPath and os.path.isdir(fromPath)):
       self.onError('not found directory path')
-    self.copyNetwork(fromPath)
+    self.file.copy_network(fromPath)
     self.createNetwork()
     if len(self.network) > 3:
-      self.Error('require layer length > 3')
+      self.onError('require layer length > 3')
     return self.network
 
   def isExistNetwork(self):
@@ -157,65 +92,30 @@ class Model:
 # Create Learning Data
   # Make learning data
   def makeLearningDataFile(self, fpath: str, data: dict):
-    learningColumns = ('input', 'target')
-    if not any((k in data.keys() for k in learningColumns)):
-      print('not found items')
-      return
-    headerColumns = ','.join([data for data in learningColumns])
-    self._output_file(fpath, headerColumns, write_type='wt')
-
-    learningDatas = tuple([data[column] for column in learningColumns])
-    headerParams = ','.join([str(len(datas[0].split(' '))) for datas in learningDatas])
-    self._output_file(fpath, headerParams)
-    inputData, targetData = learningDatas
-    for idata, tdata in zip(inputData, targetData):
-      string = idata.replace(' ', ', ')
-      string += ', ' + tdata.replace(' ', ', ')
-      self._output_file(fpath, string)
+    self.file.make_learning_data(fpath, data)
 
   # Load learning data
-  def readLearningDataFile(self, fpath):
-    learning_data = []
-    target_data = []
-    if not os.path.isfile(fpath):
+  def readLearningDataFile(self, fpath: str):
+    learning_data = self.file.read_learning_data(fpath)
+    if learning_data is False:
       return
-    file = self._read_file(fpath)
-    header, contents = (file[1], file[2:])
-    columns = tuple([int(value.strip()) for value in header.split(self.sep)])
-    if not (len(columns) == 2 and all(columns)):
-      self.onError('Invalid learning data')
-      return False
-
-    learning_num, target_num = columns
-    for row in contents:
-      values = tuple([int(value.strip()) for value in row.split(self.sep)])
-      if not (learning_num+target_num == len(values)):
-        self.onError('Invalid learning data')
-        return False
-      learning_data.append(values[:learning_num])
-      target_data.append(values[learning_num:])
-    return tuple(learning_data), tuple(target_data)
+    _, input_data, target_data = learning_data
+    return input_data, target_data
 
 # Train Setting Dialog Function
   # Set training params
-  def writeNetworkParam(self, data):
-    columns = ('error', 'epochs', 'batch', 'interval')
-    fpath = self.dataPath['setting']
-    if columns != tuple(data.keys()):
-      return
-    wtype = 'wt' if os.path.isfile(fpath) else 'at'
-    self._output_file(fpath, ','.join(columns), write_type=wtype)
-    self._output_file(fpath, ','.join([data[column] for column in columns])) 
-    configUpdate(self.config, { 'Setting': data })
+  def writeNetworkParam(self, data: dict):
+    self.file.write_network_param(data)
 
-  def onChangeTrainOperation(self, flag):
-    if self.readOperation() == self.config['Operate']['end']:
+  def onChangeTrainOperation(self, flag: bool):
+    if self.file.is_operation('end'):
       return False
-    self.writeOperation('start' if flag else 'stop')
+    if not (os.path.isfile(self.dataPath['learning'])):
+      self.onError('learning data file was not found')
+      return
+
+    self.file.write_operation('start' if flag else 'stop')
     if flag and not self.process:
-      if not (os.path.isfile(self.dataPath['learning'])):
-        self.onError('learning data file was not found')
-        return
       if not self.NNApp.network:
         self.onError('create Neural Network before train')
         return
@@ -224,143 +124,76 @@ class Model:
 
   # Start train network
   def onLearnNetwork(self, func=None):
-    if self.readOperation() == self.config['Operate']['end']:
+    if self.file.is_operation('end'):
       func(index=-1)
       self.process.terminate()
       return False
     func()
-    return self.readOperation() == self.config['Operate']['start']
+    return self.file.is_operation('start')
   
-  def onUpdateNetworkParam(self, fileIndex=None):
-    operation = self.readOperation()
-    isInit = operation == self.config['Operate']['init']
-    datas = self.readLearningDataFile(self.dataPath['learning'])
-    fileIndex = -1 if isInit else fileIndex
-    getIndex = fileIndex if fileIndex != None else -2
-    getOutputIndex = getIndex+4 if getIndex >= 0 else getIndex
-    flag = (operation == self.config['Operate']['start']) or isInit
-    if not (flag or bool(fileIndex)):
-      return
-    lines = self._read_file(self.dataPath['output'])
-    if lines is None:
-      return
-    if len(lines)-3 < abs(getOutputIndex):
-      return
-    header = lines[1]
-    input_num, hidden_num, output_num = tuple([int(line.strip()) for line in header.split(',')])
-
-    loss = tuple([float(line.split(',')[0].strip()) for line in lines[4:] if line.split(',')[0].strip() != ''])
-    flat_array = tuple([float(line.strip()) if line != '' else None for line in lines[getOutputIndex].split(',')])
-    index = int(flat_array[1])
-    flat_array = flat_array[2:]
-    input_out = flat_array[:input_num]
-    flat_array = flat_array[input_num:]
-    hidden_out = flat_array[:hidden_num]
-    flat_array = flat_array[hidden_num:]
-    output_out = flat_array[:]
-    weights, _ = self.readNetworkFile(getIndex, isInit)
-
-    inputData = datas[0][index] if datas else [0]*input_num
-    targetData = datas[1][index] if datas else [0]*output_num
-    return tuple([isInit, loss, tuple([inputData, hidden_out, output_out, targetData]), weights])
-
-  def validateLearingData(self, fpath):
-    if not os.path.isfile(fpath):
-      return False
-    datas = self._read_file(fpath)
-    data = tuple([int(d.strip()) for d in datas[1].split(',')])
-    validateInOut = (self.network[0], self.network[-1])
-    if validateInOut != data:
-      self.onError('not equal from network input or output to learning data')
-      return False
-    return True
+  def onUpdateNetworkParam(self, fileIndex: int=None):
+    return self.file.read_network_param(file_index=fileIndex)
 
   # Select learning data for train
-  def onSelectLearningDataForTrain(self, fpath):
+  def onSelectLearningDataForTrain(self, fpath: str):
     if not fpath:
       return False
-    if os.path.isfile(self.dataPath['learning']):
-      os.remove(self.dataPath['learning'])
-    shutil.copyfile(fpath, self.dataPath['learning'])
     self.learningDataPath = fpath
+    if not self.file.validate_learning_data(fpath):
+      return False
+    return self.file.select_train_file(fpath)
   
   # Load setting data file
   def readSettingFile(self):
-    if not os.path.isfile(self.dataPath['setting']):
-      return dict({ key: float(value) for key, value in self.config['Setting'].items() })
-    contents = self._read_file(self.dataPath['setting'])
-    array = ('error', 'epochs', 'batch', 'interval')
-    values = tuple([float(column.strip()) for column in contents[-1].split(self.sep) if is_num(column.strip())])
-    return { key: value for key, value in zip(array, values) }
+    return self.file.read_setting_file(self.dataPath['setting'])
 
   def onInitWeight(self, func):
     if self.isExistNetwork():
       if self.process:
         self.process.terminate()
         self.process = None
-      self.NNApp.initWeight()
-      self.writeOperation('init')
+      self.NNApp.init_weight()
+      self.file.write_operation('init')
       func()
 
 # Test Dialog Functions
-  def readLearningData(self, fpath):
+  def readTestData(self, fpath: str):
     self.testDataPath = fpath
-    self.validateLearingData(fpath)
-    self.testMaxIndex = self.NNApp.setTestData(fpath)
+    self.file.validate_learning_data(fpath)
+    self.testMaxIndex = self.NNApp.set_test_data(fpath)
 
   def startTest(self):
-    self.NNApp.createNetwork(readFile=self.dataPath['parameter'], out=False)
+    self.NNApp.create_network(readFile=self.dataPath['parameter'], out=False)
     self.testAnswers = tuple([self.NNApp.test(i) for i in range(self.testMaxIndex)])
     return len(self.testAnswers)
 
-  def getTestAnswerByIndex(self, index):
+  def getTestAnswerByIndex(self, index: int):
     items = self.testAnswers[index]
     if not items:
       return
     outs, weights, datas = items
-    
     return tuple([True, [], tuple([datas[0], *outs[1:], datas[1]]), weights])
   
-  def onPutFile(self, fpath):
+  def onPutFile(self, fpath: str):
     if not (fpath and self.testDataPath):
       return
-    shutil.copyfile(self.testDataPath, fpath)
-    with open(fpath, 'rt') as infile:
-      lines = infile.readlines()
-    with open(fpath, 'wt') as out:
-      print(lines[0].rstrip() + ',output', file=out)
-      print(lines[1].rstrip() + f',{lines[1].split(",")[-1].strip()}', file=out)
-      for index, line in enumerate(lines[2:]):
-        outs, _, _ = self.testAnswers[index]
-        print(line.rstrip()+','+','.join(['{:.3f}'.format(ans) for ans in outs[-1]]), file=out)
-
-# Operation    
-  def writeOperation(self, key: str):
-    if not key in ('init', 'start', 'stop'):
-      return
-    with open(self.config['Paths']['operation'], 'wt', encoding='utf-8') as f:
-      print(self.config['Operate'][key], file=f)
-
-  
-  def readOperation(self):
-    with open(self.config['Paths']['operation'], 'rt', encoding='utf-8') as f:
-      lines = f.readlines()
-    return tuple([line.strip().upper() for line in lines])[0]
+    self.file.put_result_file(self.testAnswers, self.testDataPath, fpath)
 
 # Property Dialog
-  def propertySubmit(self, fpath, inputSize, colorRange):
-    if fpath:
-      configUpdate(self.config, { 'Paths': { 'reference': fpath } }, self.config['Paths']['configfile'])
-      self.referencePath = fpath
+  def propertySubmit(self, dirpath: str, inputSize: str, colorRange: float):
+    if self.file.property_submit(dirpath):
+      self.referencePath = dirpath
     self.inputSize = inputSize
     self.colorRange = colorRange
     return self.inputSize, self.colorRange
-  
-  def getParam(self, layer, neuron, weight=None):
-    weights, biases = self.readNetworkFile(-1)
+
+  def getParam(self, layer: Layer, neuron: Neuron, weight=None):
+    if layer == 0:
+      return None
+    _, weights, biases = self.file.read_network_file(file_index=-1)
     return biases[layer-1][neuron] if weight is None else weights[layer-1][neuron][weight]
-  
-  def onCutWeight(self, layer, neuron, weight=None, onCut=None):
+
+  def onCutWeight(self, layer: Layer, neuron: Neuron, weight=None, onCut=None):
     if weight is None:
       return
     if self.NNApp.cut_combining(layer, neuron, weight):

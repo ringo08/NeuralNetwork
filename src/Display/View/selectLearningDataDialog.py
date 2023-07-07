@@ -34,10 +34,10 @@ class SelectLearningDataDialog(Dialog):
     self.updateInterval = StyledTextField(master=paramFrame, text='update interval', defaultValue=self.defaultValues.get('freq', 1))
   
   def _buttonbox(self, master):
-    self.footer = (
+    self.footer = tuple([
       { 'text': 'ok', 'command': self.ok },
       { 'text': 'cancel', 'command': self.cancel }
-    )
+    ])
     self.actions = ButtonBox(master, width=self.width, height=64, children=self.footer, padx=48)
 
   def _selectLearningDataFile(self):
