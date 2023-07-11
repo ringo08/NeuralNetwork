@@ -38,7 +38,7 @@ def configWrite(path_config=''):
 
   config['Setting'] = {
     'error': '1e-05',
-    'epochs': '100',
+    'epoch': '100',
     'batch': '100',
     'interval': '1'
   }

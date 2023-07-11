@@ -7,7 +7,7 @@ def particleCount(decay, p0, time):
   return (p)
 
 class Graph(Frame):
-  def __init__(self, master, width=420, height=220):
+  def __init__(self, master, width=420, height=220, epochs=100):
     super().__init__(master, width=width, height=height)
     self.tickSize = 24
     self.canvasSize = (width-self.tickSize, height-self.tickSize)
@@ -16,6 +16,7 @@ class Graph(Frame):
     self.minimum = math.log10(0.1)
     self.data = []
     self.maxPoint = 0
+    self.epochs = int(epochs)
     self.ytickPoints = ()
     self.ytickLabels = ()
     self.xtickPoints = ()
@@ -33,7 +34,7 @@ class Graph(Frame):
     self.ytickCanvas = tk.Canvas(self, highlightthickness=0)
     self.xtickCanvas = tk.Canvas(self, highlightthickness=0)
     self.ytickCanvas.place(x=0, y=0, width=self.tickSize, height=self.canvasSize[1])
-    self.xtickCanvas.place(x=self.tickSize, y=self.canvasSize[1], width=self.canvasSize[0], height=self.tickSize)
+    self.xtickCanvas.place(x=0, y=self.canvasSize[1], width=self.canvasSize[0]+self.tickSize, height=self.tickSize)
 
   def click(self, event):
     print(event)
@@ -60,11 +61,9 @@ class Graph(Frame):
 
     if self.maxPoint < 1:
       return
-    xtickPoint = int(self.maxPoint/10)
-    if xtickPoint > 0:
-      xtick = { n: (width/self.maxPoint)*n for n in range(1, self.maxPoint+1, xtickPoint) }
-    else:
-      xtick = { n: (width/self.maxPoint)*n for n in range(1, self.maxPoint) }
+    # xtickPoint = int(self.maxPoint/10)
+    maxEpoch = self.epochs*math.ceil(self.maxPoint/self.epochs)
+    xtick = { n: ((width-self.tickSize)/10)*i for i, n in enumerate(range(0, maxEpoch + 1, maxEpoch//10)) }
     h = height/yRange
     ytick = { l: h*n for l, n in zip(range(int(self.maximum), int(minimum-1), -1), range(int(yRange+1))) }
     self.tick_plot(xtick, ytick)
@@ -73,9 +72,7 @@ class Graph(Frame):
       return
     coords = []
     for n in range(self.maxPoint):
-      x = (width * n) / self.maxPoint
-      coords.append(x)
-      coords.append(h*(-1*math.log10(self.data[n])+self.maximum))
+      coords.extend([((width-self.tickSize) * n) / maxEpoch, h*(-1*math.log10(self.data[n])+self.maximum)])
     self.graphCanvas.coords('line', *coords)
     del coords
     self.graphCanvas.update()
@@ -95,17 +92,17 @@ class Graph(Frame):
     self.xtickPoints = self._create_ticks_points(self.xtickCanvas, ticks=xtick.values(), oriental='x')
     self.xtickLabels = self._create_tick_labels(self.xtickCanvas, labels=list(xtick.keys()), ticks=xtick.values(), oriental='x')
 
-  def _create_tick_labels(self, canvas, labels=(), ticks=(), tickPad=4, oriental='x'):
+  def _create_tick_labels(self, canvas: tk.Canvas, labels=(), ticks=(), tickPad=4, oriental='x'):
     if oriental == 'x':
-      labels = tuple([canvas.create_text(tick, tickPad, text=int(labels[i]), anchor=tk.N, font=('', 10)) for i, tick in enumerate(ticks)])
+      labels = tuple([canvas.create_text(self.tickSize+tick, tickPad, text=int(label), anchor=tk.N, font=('', 10)) for label, tick in zip(labels, ticks)])
     elif oriental == 'y':
-      labels = tuple([canvas.create_text(tickPad, tick+tickPad, text=int(labels[i]), anchor=tk.W, font=('', 10)) for i, tick in enumerate(ticks)])
+      labels = tuple([canvas.create_text(tickPad, tick+tickPad, text=int(label), anchor=tk.W, font=('', 10)) for label, tick in zip(labels, ticks)])
 
     return labels
 
-  def _create_ticks_points(self, canvas, ticks=(), tickLen=4, oriental='x'):
+  def _create_ticks_points(self, canvas: tk.Canvas, ticks=(), tickLen=4, oriental='x'):
     if oriental == 'x':
-      points = tuple([(tick, 0, tick, tickLen) for tick in ticks])
+      points = tuple([(self.tickSize+tick, 0, self.tickSize+tick, tickLen) for tick in ticks])
     elif oriental == 'y':
       points = tuple([(self.tickSize-tickLen, tick, self.tickSize, tick) for tick in ticks])
 

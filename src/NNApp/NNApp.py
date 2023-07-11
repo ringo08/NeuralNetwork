@@ -100,10 +100,10 @@ class NNApp:
         self.network.fit(self.learning_data[index])
         self.file.output_network(self.network, self.data_path['parameter'])
         self.file.output_layer_out(self.network, self.data_path['output'], index=index, score=self.score)
+        e += 1
         if e >= self.epoch:
           self.file.write_operation('stop')
           e = 0
-        e += 1
         if answer[-1] < self.error:
           self.file.write_operation('end')
           break

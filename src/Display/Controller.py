@@ -96,6 +96,7 @@ class Controller:
       title='network',
       onUpdate=self.model.onUpdateNetworkParam,
       minimum=setting.get('error'),
+      epochs=setting.get('epoch'),
       onClick=self.openParamDialog,
       defaultLayer=defaultLayer
     )

@@ -29,7 +29,7 @@ class SelectLearningDataDialog(Dialog):
     paramFrame.pack(fill=tk.BOTH, padx=48, pady=8, ipady=16, ipadx=16, expand=True)
   
     self.minimum = StyledTextField(master=paramFrame, text='minimum error', defaultValue=self.defaultValues.get('error', 1e-5), bindText='1e-')
-    self.epochs = StyledTextField(master=paramFrame, text='epochs', defaultValue=int(self.defaultValues.get('epochs', 100)))
+    self.epochs = StyledTextField(master=paramFrame, text='epochs', defaultValue=int(self.defaultValues.get('epoch', 100)))
     self.batch = StyledTextField(master=paramFrame, text='batch size', defaultValue=int(self.defaultValues.get('batch', 100)))
     self.updateInterval = StyledTextField(master=paramFrame, text='update interval', defaultValue=self.defaultValues.get('freq', 1))
   
@@ -53,7 +53,7 @@ class SelectLearningDataDialog(Dialog):
       return
     self.writeNetworkParam({
       'error': self.minimum.get(),
-      'epochs': self.epochs.get(),
+      'epoch': self.epochs.get(),
       'batch': self.batch.get(),
       'interval': self.updateInterval.get()
     })

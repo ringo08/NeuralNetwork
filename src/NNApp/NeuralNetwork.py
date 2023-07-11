@@ -91,8 +91,8 @@ class Network:
     self.output_num = output_num
     self.score = None
     if (not weights) and (not biases):
-      weights, biases = self._init_net()
-      # self._init_net_with_nguyen_widrow()
+      # weights, biases = self._init_net()
+      weights, biases = self._init_net_with_nguyen_widrow()
 
     self.layers = [Layer(num=self.input_num, is_input=True)]
     for weight, bias in zip(weights, biases):
@@ -118,6 +118,7 @@ class Network:
 
     if place:
       [layer.update_attribute(weight, bias) for layer, weight, bias in zip(self.layers[:0:-1], weights, biases)]
+    return weights, biases
 
   def _init_weight(self, in_num: int, out_num: int, wRange=1):
     return [[random.uniform(-wRange, wRange) for _ in range(in_num)] for _ in range(out_num)]

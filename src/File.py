@@ -236,7 +236,7 @@ class File:
 
 # Train files
   def write_network_param(self, data):
-    columns = ('error', 'epochs', 'batch', 'interval')
+    columns = ('error', 'epoch', 'batch', 'interval')
     fpath = self.data_path['setting']
     if columns != tuple(data.keys()):
       return
